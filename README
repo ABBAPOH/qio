@@ -1,0 +1,8 @@
+QIO is an asynchronous file system implementation.
+
+To build QIO you need to open qio.qbs file in a Qt Creator or build manually using qbs:
+    git clone git@github.com:ABBAPOH/qio.git
+    cd qio
+    mkdir build
+    cd build
+    qbs install -f ../qio.qbs release 
