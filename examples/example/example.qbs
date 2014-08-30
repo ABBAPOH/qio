@@ -12,7 +12,16 @@ Application {
     Depends { name: "qio" }
 
     cpp.includePaths: project.includePaths
-    cpp.cxxFlags: project.cxxFlags
+    cpp.cxxFlags: {
+        if (qbs.targetOS.contains("osx"))
+            return [ "-std=c++0x", "-stdlib=libc++" ]
+        if (qbs.targetOS.contains("linux"))
+            return [ "-std=c++0x", "-Werror" ]
+        if (qbs.targetOS.contains("windows") && cpp.compilerName.contains("g++"))
+            return "-std=c++11";
+        else
+            return []
+    }
     cpp.linkerFlags: project.linkerFlags
     cpp.minimumOsxVersion: "10.7"
 
