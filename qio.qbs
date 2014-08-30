@@ -20,7 +20,7 @@ Project {
     }
 
     property string install_plugin_path: {
-        return install_library_path + "/plugins"
+        return install_library_path + "/plugins/filesystems"
     }
 
     property stringList includePaths: {
