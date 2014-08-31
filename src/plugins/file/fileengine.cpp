@@ -2,6 +2,10 @@
 
 #include <QIO/FileInfoData>
 #include <QIO/RunExtensions>
+
+#include <QtConcurrent/QtConcurrentRun>
+
+#include <QtCore/QDirIterator>
 #include <QtCore/QFileInfo>
 #include <QtCore/QMimeDatabase>
 
@@ -59,8 +63,6 @@ bool FileEngine::waitForReadyRead(int msecs)
     return false;
 }
 
-#include <QtConcurrent/QtConcurrentRun>
-#include <QtCore/QDirIterator>
 QFuture<QString> FileEngine::list()
 {
     typedef void (*func)(QFutureInterface<QString> &future, QString path);
@@ -89,10 +91,14 @@ QFuture<FileInfo> FileEngine::entryList()
     return QtConcurrent::run(f, url().toLocalFile());
 }
 
-QFuture<bool> FileEngine::mkdir(const QString &fileName)
+QFuture<bool> FileEngine::mkdir(const QString &dirName)
 {
-    Q_UNUSED(fileName);
-    return QFuture<bool>();
+    typedef void (*func)(QFutureInterface<bool> &future, QString path, QString dirName);
+    func f = [](QFutureInterface<bool> &future, QString path, QString dirName) {
+        future.reportResult(QDir(path).mkdir(dirName));
+    };
+
+    return QtConcurrent::run(f, url().toLocalFile(), dirName);
 }
 
 QFuture<bool> FileEngine::remove(const QString &fileName)

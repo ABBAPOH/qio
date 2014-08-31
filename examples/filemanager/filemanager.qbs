@@ -1,7 +1,6 @@
 import qbs.base 1.0
 
 Application {
-    name: "example"
     type: "application"
     destinationDirectory: project.install_app_path
 
@@ -27,7 +26,8 @@ Application {
 
     files: [
         "*.cpp",
-        "*.h"
+        "*.h",
+        "mainwindow.ui"
     ]
     Group {
         fileTagsFilter: product.type
