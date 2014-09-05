@@ -28,7 +28,7 @@ void PluginManager::loadPlugins()
 {
     QDir dir = QCoreApplication::applicationDirPath();
     dir.cdUp();
-    foreach (const QString &folder, QStringLiteral(PLUGINS_DIR).split("/")) {
+    foreach (const QString &folder, QString(PLUGINS_DIR).split("/")) {
         dir.cd(folder);
     }
     qDebug() << "loading plugins from" << dir.absolutePath();

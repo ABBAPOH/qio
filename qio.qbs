@@ -31,22 +31,6 @@ Project {
         return []
     }
 
-    property stringList cxxFlags: {
-        if (qbs.targetOS.contains("osx"))
-            return [ "-std=c++0x", "-stdlib=libc++" ]
-        if (qbs.targetOS.contains("linux"))
-            return [ "-std=c++0x", "-Werror" ]
-        else
-            return []
-    }
-
-    property stringList linkerFlags: {
-        if (qbs.targetOS.contains("osx"))
-            return [ "-stdlib=libc++" ]
-        else
-            return []
-    }
-
     name: "QIO"
 
     SubProject {

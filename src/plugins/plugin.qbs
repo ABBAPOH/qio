@@ -6,8 +6,17 @@ DynamicLibrary {
     Depends { name: "qio" }
 
     cpp.includePaths: project.includePaths
-    cpp.cxxFlags: project.cxxFlags
-    cpp.linkerFlags: project.linkerFlags
+    cpp.cxxFlags: {
+        if (qbs.targetOS.contains("osx"))
+            return [ "-std=c++11", "-stdlib=libc++" ]
+        if (qbs.targetOS.contains("linux"))
+            return [ "-std=c++11", "-Werror" ]
+        if (qbs.targetOS.contains("windows") && cpp.compilerName.contains("g++"))
+            return "-std=c++11";
+        else
+            return []
+    }
+    cpp.linkerFlags: qbs.targetOS.contains("osx") ? [ "-stdlib=libc++" ] : []
     cpp.minimumOsxVersion: "10.7"
 
     files: [
