@@ -14,7 +14,7 @@ public:
     explicit FilePrivate(File *qq) : q_ptr(qq) {}
     void init();
 
-    void openFinished(bool ok, qint64 size);
+//    void openFinished(bool ok, qint64 size);
 
     AbstractFileEngine *engine;
     QUrl url;

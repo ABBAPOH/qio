@@ -29,15 +29,10 @@ FileEngine::FileEngine()
 {
 }
 
-void FileEngine::open(QIODevice::OpenMode mode)
+QFuture<bool> FileEngine::open(QIODevice::OpenMode mode)
 {
     Q_UNUSED(mode);
-}
-
-bool FileEngine::waitForOpened(int msecs)
-{
-    Q_UNUSED(msecs);
-    return false;
+    return QFuture<bool>();
 }
 
 void FileEngine::close()

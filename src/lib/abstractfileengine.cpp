@@ -25,20 +25,19 @@ void AbstractFileEngine::setUrl(const QUrl &url)
     d->url = url;
 }
 
-void AbstractFileEngine::openFinished(bool ok, qint64 size)
-{
-    Q_D(AbstractFileEngine);
-    if (d->file)
-        d->file->d_ptr->openFinished(ok, size);
-}
+//void AbstractFileEngine::openFinished(bool ok, qint64 size)
+//{
+//    Q_D(AbstractFileEngine);
+//    if (d->file)
+//        d->file->d_ptr->openFinished(ok, size);
+//}
 
 class EmptyFileEngine : public AbstractFileEngine
 {
 public:
     inline EmptyFileEngine() {}
 
-    void open(QIODevice::OpenMode mode) Q_DECL_OVERRIDE;
-    bool waitForOpened(int msecs = -1) Q_DECL_OVERRIDE;
+    QFuture<bool> open(QIODevice::OpenMode mode) Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
 
     bool seek(qint64 pos) Q_DECL_OVERRIDE;
@@ -54,15 +53,10 @@ public:
     QFuture<FileInfo> stat(const QString &fileName) Q_DECL_OVERRIDE;
 };
 
-void EmptyFileEngine::open(QIODevice::OpenMode mode)
+QFuture<bool> EmptyFileEngine::open(QIODevice::OpenMode mode)
 {
     Q_UNUSED(mode);
-}
-
-bool EmptyFileEngine::waitForOpened(int msecs)
-{
-    Q_UNUSED(msecs);
-    return false;
+    return QFuture<bool>();
 }
 
 void EmptyFileEngine::close()

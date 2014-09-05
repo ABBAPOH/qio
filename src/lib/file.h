@@ -3,6 +3,7 @@
 
 #include <QtCore/QIODevice>
 #include <QtCore/QFileDevice>
+#include <QtCore/QFuture>
 #include <QtCore/QUrl>
 
 class FilePrivate;
@@ -21,8 +22,7 @@ public:
     ~File();
 
     bool open(OpenMode mode);
-    void asyncOpen(OpenMode mode);
-    bool waitForOpened(int msecs = -1);
+    QFuture<bool> asyncOpen(OpenMode mode);
     void close();
 
     qint64 size() const;
@@ -54,6 +54,9 @@ protected:
     FilePrivate *d_ptr;
 
     friend class AbstractFileEngine;
+
+private slots:
+    void onOpenFinished();
 };
 
 #endif // FILE_H

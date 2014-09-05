@@ -6,24 +6,13 @@
 #include "abstractfileengineplugin.h"
 #include "pluginmanager_p.h"
 
+#include <QtCore/QFutureWatcher>
+
 void FilePrivate::init()
 {
     state = File::Closed;
     openMode = QIODevice::NotOpen;
     size = 0;
-}
-
-void FilePrivate::openFinished(bool ok, qint64 size)
-{
-    Q_Q(File);
-    if (ok) {
-        state = File::Opened;
-        size = size;
-        q->QIODevice::open(openMode);
-    } else {
-        state = File::Closed;
-    }
-    openMode = QIODevice::NotOpen;
 }
 
 File::File(QObject *parent) :
@@ -45,22 +34,23 @@ File::~File()
 
 bool File::open(QIODevice::OpenMode mode)
 {
-    asyncOpen(mode);
-    return waitForOpened();
+    auto future = asyncOpen(mode);
+    future.waitForFinished();
+    return future.result();
 }
 
-void File::asyncOpen(QIODevice::OpenMode mode)
+QFuture<bool> File::asyncOpen(QIODevice::OpenMode mode)
 {
     Q_D(File);
+    if (d->state != File::Closed)
+        return QFuture<bool>();
     d->state = File::Opening;
     d->openMode = mode;
-    d->engine->open(mode);
-}
-
-bool File::waitForOpened(int msecs)
-{
-    Q_D(File);
-    return d->engine->waitForOpened(msecs);
+    QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>(this);
+    connect(watcher, &QFutureWatcherBase::finished, this, &File::onOpenFinished);
+    auto future = d->engine->open(mode);
+    watcher->setFuture(future);
+    return future;
 }
 
 void File::close()
@@ -144,4 +134,20 @@ qint64 File::readData(char *data, qint64 maxlen)
 qint64 File::writeData(const char *data, qint64 maxlen)
 {
 
+}
+
+void File::onOpenFinished()
+{
+    Q_D(File);
+    QFutureWatcher<bool> *watcher = static_cast<QFutureWatcher<bool> *>(sender());
+    bool ok = watcher->future().result();
+    if (ok) {
+        d->state = File::Opened;
+//        size = size;
+        QIODevice::open(d->openMode);
+    } else {
+        d->state = File::Closed;
+    }
+    d->openMode = QIODevice::NotOpen;
+    delete watcher;
 }

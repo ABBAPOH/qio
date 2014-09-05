@@ -8,8 +8,7 @@ class FileEngine : public AbstractFileEngine
 public:
     FileEngine();
 
-    void open(QIODevice::OpenMode mode) Q_DECL_OVERRIDE;
-    bool waitForOpened(int msecs = -1) Q_DECL_OVERRIDE;
+    QFuture<bool> open(QIODevice::OpenMode mode) Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
 
     bool seek(qint64 pos) Q_DECL_OVERRIDE;

@@ -18,8 +18,8 @@ public:
     QUrl url() const;
     virtual void setUrl(const QUrl &url);
 
-    virtual void open(QIODevice::OpenMode mode) = 0;
-    virtual bool waitForOpened(int msecs = -1) = 0;
+    virtual QFuture<bool> open(QIODevice::OpenMode mode) = 0;
+//    virtual bool waitForOpened(int msecs = -1) = 0;
     virtual void close() = 0;
 
     virtual bool seek(qint64 pos) = 0;
@@ -35,9 +35,6 @@ public:
     virtual QFuture<FileInfo> stat(const QString &fileName) = 0;
 
     static AbstractFileEngine *emptyEngine();
-
-protected:
-    void openFinished(bool ok, qint64 size);
 
 protected:
     AbstractFileEnginePrivate *d_ptr;
