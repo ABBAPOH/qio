@@ -7,7 +7,7 @@
 #include <QtCore/QUrl>
 
 class FilePrivate;
-class File : public QIODevice
+class QIO_EXPORT File : public QIODevice
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(File)

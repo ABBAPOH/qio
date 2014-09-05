@@ -7,7 +7,7 @@
 
 class AbstractFileEngine;
 
-class AbstractFileEnginePlugin : public QObject
+class QIO_EXPORT AbstractFileEnginePlugin : public QObject
 {
     Q_OBJECT
 public:

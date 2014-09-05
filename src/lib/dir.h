@@ -9,7 +9,7 @@
 
 class DirData;
 
-class Dir
+class QIO_EXPORT Dir
 {
 public:
     Dir();

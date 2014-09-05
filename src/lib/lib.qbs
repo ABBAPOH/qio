@@ -7,7 +7,15 @@ DynamicLibrary {
     Depends { name: "Qt.core" }
     Depends { name: "Qt.core-private" }
 
-    cpp.defines: [ "PLUGINS_DIR=\"" + project.install_plugin_path + "\""]
+    cpp.defines: [
+        "QIO_EXPORT=Q_DECL_EXPORT",
+        "PLUGINS_DIR=\"" + project.install_plugin_path + "\""
+    ]
+
+    Export {
+        Depends { name: "cpp" }
+        cpp.defines: [ "QIO_EXPORT=Q_DECL_IMPORT" ]
+    }
     cpp.includePaths: project.includePaths
     cpp.cxxFlags: {
         if (qbs.targetOS.contains("osx"))

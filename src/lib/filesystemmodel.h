@@ -5,7 +5,7 @@
 #include <QtCore/QAbstractItemModel>
 
 class FileSystemModelPrivate;
-class FileSystemModel : public QAbstractItemModel
+class QIO_EXPORT FileSystemModel : public QAbstractItemModel
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(FileSystemModel)

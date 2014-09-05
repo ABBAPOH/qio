@@ -7,7 +7,7 @@
 #include <QtCore/QFuture>
 
 class AbstractFileEnginePrivate;
-class AbstractFileEngine
+class QIO_EXPORT AbstractFileEngine
 {
     Q_DECLARE_PRIVATE(AbstractFileEngine)
     Q_DISABLE_COPY(AbstractFileEngine)

@@ -20,7 +20,9 @@ private:
 
     struct ThreadData
     {
-        QFile *file {0};
+        ThreadData() : file(Q_NULLPTR) {}
+
+        QFile *file;
         QMutex mutex;
     } data;
 };

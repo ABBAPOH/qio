@@ -128,12 +128,12 @@ void File::setUrl(const QUrl &url)
 
 qint64 File::readData(char *data, qint64 maxlen)
 {
-
+    return -1;
 }
 
 qint64 File::writeData(const char *data, qint64 maxlen)
 {
-
+    return -1;
 }
 
 void File::onOpenFinished()

@@ -7,7 +7,7 @@
 
 class FileInfoData;
 
-class FileInfo
+class QIO_EXPORT FileInfo
 {
 public:
     FileInfo();
