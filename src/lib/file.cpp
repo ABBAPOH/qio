@@ -63,8 +63,10 @@ File::~File()
 
 bool File::open(QIODevice::OpenMode mode)
 {
+    Q_D(File);
     asyncOpen(mode);
     waitForOpened();
+    return d->state == State::Opened;
 }
 
 void File::asyncOpen(QIODevice::OpenMode mode)
