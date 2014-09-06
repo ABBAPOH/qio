@@ -14,14 +14,18 @@ public:
     explicit FilePrivate(File *qq) : q_ptr(qq) {}
     void init();
 
-//    void openFinished(bool ok, qint64 size);
+    void openFinished(bool ok);
+    void readFinished(const char *data, qint64 length);
 
     AbstractFileEngine *engine;
     QUrl url;
 
     File::State state;
     QIODevice::OpenMode openMode;
-    qint64 size;
+
+    int bufferSize;
+    int chunkSize;
+    QByteArray buffer;
 };
 
 #endif // FILE_P_H

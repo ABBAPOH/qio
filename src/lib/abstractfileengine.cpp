@@ -37,10 +37,14 @@ class EmptyFileEngine : public AbstractFileEngine
 public:
     inline EmptyFileEngine() {}
 
-    QFuture<bool> open(QIODevice::OpenMode mode) Q_DECL_OVERRIDE;
+    void open(QIODevice::OpenMode mode) Q_DECL_OVERRIDE;
+    bool waitForOpened(int msecs) Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
 
     bool seek(qint64 pos) Q_DECL_OVERRIDE;
+    qint64 size() const  Q_DECL_OVERRIDE;
+
+    void read(qint64 maxlen) Q_DECL_OVERRIDE;
 
     bool waitForBytesWritten(int msecs = -1) Q_DECL_OVERRIDE;
     bool waitForReadyRead(int msecs = -1) Q_DECL_OVERRIDE;
@@ -53,10 +57,15 @@ public:
     QFuture<FileInfo> stat(const QString &fileName) Q_DECL_OVERRIDE;
 };
 
-QFuture<bool> EmptyFileEngine::open(QIODevice::OpenMode mode)
+void EmptyFileEngine::open(QIODevice::OpenMode mode)
 {
     Q_UNUSED(mode);
-    return QFuture<bool>();
+}
+
+bool EmptyFileEngine::waitForOpened(int msecs)
+{
+    Q_UNUSED(msecs);
+    return false;
 }
 
 void EmptyFileEngine::close()
@@ -68,6 +77,16 @@ bool EmptyFileEngine::seek(qint64 pos)
 {
     Q_UNUSED(pos);
     return false;
+}
+
+qint64 EmptyFileEngine::size() const
+{
+    return -1;
+}
+
+void EmptyFileEngine::read(qint64 maxlen)
+{
+    Q_UNUSED(maxlen);
 }
 
 bool EmptyFileEngine::waitForBytesWritten(int msecs)
@@ -115,4 +134,16 @@ Q_GLOBAL_STATIC(EmptyFileEngine, empty_engine)
 AbstractFileEngine *AbstractFileEngine::emptyEngine()
 {
     return empty_engine();
+}
+
+void AbstractFileEngine::openFinished(bool ok)
+{
+    Q_D(AbstractFileEngine);
+    emit d->file->d_ptr->openFinished(ok);
+}
+
+void AbstractFileEngine::readFinished(const char *data, qint64 length)
+{
+    Q_D(AbstractFileEngine);
+    d->file->d_ptr->readFinished(data, length);
 }

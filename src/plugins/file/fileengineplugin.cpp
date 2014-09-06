@@ -1,5 +1,6 @@
 #include "fileengineplugin.h"
-#include "fileengine.h"
+
+#include "fileenginefallback.h"
 
 FileEnginePlugin::FileEnginePlugin(QObject *parent) :
     AbstractFileEnginePlugin(parent)
@@ -16,5 +17,5 @@ AbstractFileEngine *FileEnginePlugin::create(const QString &scheme) const
     if (scheme != "file")
         return Q_NULLPTR;
 
-    return new FileEngine;
+    return new FileEngineFallback;
 }

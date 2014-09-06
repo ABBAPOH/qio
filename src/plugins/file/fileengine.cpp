@@ -29,35 +29,6 @@ FileEngine::FileEngine()
 {
 }
 
-QFuture<bool> FileEngine::open(QIODevice::OpenMode mode)
-{
-    Q_UNUSED(mode);
-    return QFuture<bool>();
-}
-
-void FileEngine::close()
-{
-
-}
-
-bool FileEngine::seek(qint64 pos)
-{
-    Q_UNUSED(pos);
-    return false;
-}
-
-bool FileEngine::waitForBytesWritten(int msecs)
-{
-    Q_UNUSED(msecs);
-    return false;
-}
-
-bool FileEngine::waitForReadyRead(int msecs)
-{
-    Q_UNUSED(msecs);
-    return false;
-}
-
 QFuture<QString> FileEngine::list()
 {
     typedef void (*func)(QFutureInterface<QString> &future, QString path);
