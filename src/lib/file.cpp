@@ -37,11 +37,17 @@ void FilePrivate::openFinished(bool ok)
 
 void FilePrivate::readFinished(const char *data, qint64 length)
 {
+    Q_Q(File);
+    qDebug() << "FilePrivate::readFinished" << length;
     if (length <= 0)
         return;
 
     buffer.resize(buffer.size() + length);
     memmove(buffer.data(), data, length);
+    qint64 maxlen = bufferSize - buffer.size();
+    if (maxlen > 0)
+        engine->read(qMin<qint64>(maxlen, chunkSize));
+    emit q->readyRead();
 }
 
 File::File(QObject *parent) :
@@ -102,12 +108,14 @@ qint64 File::size() const
 bool File::seek(qint64 pos)
 {
     Q_D(File);
+    QIODevice::seek(pos);
     return d->engine->seek(pos);
 }
 
 qint64 File::bytesAvailable() const
 {
-    return 0;
+    Q_D(const File);
+    return d->buffer.size();
 }
 
 qint64 File::bytesToWrite() const

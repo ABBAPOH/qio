@@ -19,11 +19,6 @@ DynamicLibrary {
     cpp.linkerFlags: qbs.targetOS.contains("osx") ? [ "-stdlib=libc++" ] : []
     cpp.minimumOsxVersion: "10.7"
 
-    files: [
-        "*.cpp",
-        "*.h",
-    ]
-
     Group {
         fileTagsFilter: product.type
         qbs.install: true

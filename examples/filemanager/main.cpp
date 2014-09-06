@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QThread>
 #include <QIO/Dir>
 #include <QIO/File>
 #include <QIO/FileSystemModel>
@@ -10,9 +11,39 @@
 
 #include "mainwindow.h"
 
+void testFile()
+{
+    const char *const filePath = "C:/Users/arch/Programming/asyncfile/freedesktop.org.xml";
+
+    qDebug() << "main" << QThread::currentThreadId();
+
+    File file;
+    file.setUrl(QUrl::fromLocalFile(filePath));
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "Can't open file";
+        return;
+    }
+
+    qDebug() << "at end" << file.atEnd();
+    QByteArray data;
+    while (file.pos() < file.size()) {
+        bool ok = file.waitForReadyRead(1000);
+        qDebug() << "waitForReadyRead" << ok;
+        qDebug() << "bytesAvailable" << file.bytesAvailable();
+        QByteArray read = file.read(file.bytesAvailable());
+        qDebug() << "read" << read;
+        data.append(read);
+//        qDebug() << "read" << file.read(file.bytesAvailable());
+    }
+    qDebug() << QString::fromUtf8(data).right(1*1024);
+    qDebug() << file.pos() << file.size();
+}
+
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    testFile();
 
     MainWindow w;
     w.show();
