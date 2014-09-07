@@ -26,12 +26,14 @@ void FileEngineFallback::open(QIODevice::OpenMode mode)
     };
     QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>(this);
     connect(watcher, &QFutureWatcherBase::finished, this, &FileEngineFallback::onOpenFinished);
-    watcher->setFuture(QtConcurrent::run(f, &data, mode));
+    openFuture = QtConcurrent::run(f, &data, mode);
+    watcher->setFuture(openFuture);
 }
 
 bool FileEngineFallback::waitForOpened(int msecs)
 {
     Q_UNUSED(msecs);
+    openFuture.waitForFinished();
     return false;
 }
 
@@ -84,12 +86,11 @@ bool FileEngineFallback::waitForReadyRead(int msecs)
 
 void FileEngineFallback::onOpenFinished()
 {
-    QFutureWatcher<void> *watcher = static_cast<QFutureWatcher<void> *>(sender());
+    QFutureWatcher<bool> *watcher = static_cast<QFutureWatcher<bool> *>(sender());
     delete watcher;
 
-    QMutexLocker l(&data.mutex);
-    readFinished(data.readBuffer.constData(), data.readBuffer.length());
-
+    openFinished(openFuture.result());
+    openFuture = QFuture<bool>();
 }
 
 void FileEngineFallback::onReadFinished()

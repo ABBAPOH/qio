@@ -40,6 +40,8 @@ private:
         QByteArray readBuffer;
         mutable QMutex mutex;
     } data;
+
+    QFuture<bool> openFuture;
 };
 
 #endif // FILEENGINEFALLBACK_H
