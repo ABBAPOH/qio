@@ -3,7 +3,8 @@
 
 #include "file_p.h"
 
-AbstractFileEngine::AbstractFileEngine() :
+AbstractFileEngine::AbstractFileEngine(QObject *parent) :
+    QObject(parent),
     d_ptr(new AbstractFileEnginePrivate(this))
 {
 }

@@ -3,7 +3,8 @@
 #include <QIO/RunExtensions>
 #include <QFutureWatcher>
 
-FileEngineFallback::FileEngineFallback()
+FileEngineFallback::FileEngineFallback(QObject *parent) :
+    AbstractFileEngine(parent)
 {
     data.file = new QFile();
 }

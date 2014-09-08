@@ -6,11 +6,11 @@
 #include <QtCore/QFile>
 #include <QtCore/QMutex>
 
-class FileEngineFallback : public QObject, public AbstractFileEngine
+class FileEngineFallback : public AbstractFileEngine
 {
     Q_OBJECT
 public:
-    FileEngineFallback();
+    explicit FileEngineFallback(QObject *parent = Q_NULLPTR);
 
     void setUrl(const QUrl &url) Q_DECL_OVERRIDE;
 

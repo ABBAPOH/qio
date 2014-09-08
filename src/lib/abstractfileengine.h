@@ -4,14 +4,16 @@
 #include "file.h"
 
 #include <QtCore/QFuture>
+#include <QtCore/QObject>
 
 class AbstractFileEnginePrivate;
-class QIO_EXPORT AbstractFileEngine
+class QIO_EXPORT AbstractFileEngine : public QObject
 {
+    Q_OBJECT
     Q_DECLARE_PRIVATE(AbstractFileEngine)
     Q_DISABLE_COPY(AbstractFileEngine)
 public:
-    AbstractFileEngine();
+    explicit AbstractFileEngine(QObject *parent = Q_NULLPTR);
     virtual ~AbstractFileEngine();
 
     QUrl url() const;
