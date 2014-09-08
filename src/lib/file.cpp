@@ -148,7 +148,7 @@ void File::setUrl(const QUrl &url)
         return;
 
     d->url = url;
-    d->engine = PluginManager::createEngine(url);
+    d->engine = PluginManager::createFileEngine(url);
     if (!d->engine) {
         d->engine = AbstractFileEngine::emptyEngine();
         setErrorString(tr("Unsupported scheme %1").arg(url.scheme()));

@@ -1,5 +1,6 @@
 #include "pluginmanager_p.h"
 
+#include "abstractdirengine.h"
 #include "abstractfileengine.h"
 
 #include <QtCore/QCoreApplication>
@@ -14,12 +15,22 @@ PluginManager::PluginManager()
     loadPlugins();
 }
 
-AbstractFileEngine *PluginManager::createEngine(const QUrl &url)
+AbstractFileEngine *PluginManager::createFileEngine(const QUrl &url)
 {
     AbstractFileEnginePlugin *handler = plugin_manager->handler(url.scheme());
     if (!handler)
         return 0;
-    AbstractFileEngine *result = handler->create(url.scheme());
+    AbstractFileEngine *result = handler->createFileEngine(url.scheme());
+    result->setUrl(url);
+    return result;
+}
+
+AbstractDirEngine *PluginManager::createDirEngine(const QUrl &url)
+{
+    AbstractFileEnginePlugin *handler = plugin_manager->handler(url.scheme());
+    if (!handler)
+        return 0;
+    AbstractDirEngine *result = handler->createDirEngine(url.scheme());
     result->setUrl(url);
     return result;
 }

@@ -12,7 +12,8 @@ public:
     explicit FileEnginePlugin(QObject *parent = 0);
 
     QStringList schemes() const Q_DECL_OVERRIDE;
-    AbstractFileEngine *create(const QString &scheme) const Q_DECL_OVERRIDE;
+    AbstractFileEngine *createFileEngine(const QString &scheme) const Q_DECL_OVERRIDE;
+    AbstractDirEngine *createDirEngine(const QString &scheme) const Q_DECL_OVERRIDE;
 };
 
 #endif // FILEENwGINEPLUGIN_H

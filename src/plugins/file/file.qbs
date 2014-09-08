@@ -6,8 +6,8 @@ Plugin {
     name: "file"
 
     files: [
-        "fileengine.cpp",
-        "fileengine.h",
+        "direngine.cpp",
+        "direngine.h",
         "fileenginefallback.cpp",
         "fileenginefallback.h",
         "fileengineplugin.cpp",

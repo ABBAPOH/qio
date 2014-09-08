@@ -10,7 +10,7 @@ FileEngineFallback::FileEngineFallback()
 
 void FileEngineFallback::setUrl(const QUrl &url)
 {
-    FileEngine::setUrl(url);
+    AbstractFileEngine::setUrl(url);
 
     QMutexLocker l(&data.mutex);
     data.file->setFileName(url.toLocalFile());

@@ -1,12 +1,12 @@
 #ifndef FILEENGINE_H
 #define FILEENGINE_H
 
-#include <QIO/AbstractFileEngine>
+#include <QIO/AbstractDirEngine>
 
-class FileEngine : public AbstractFileEngine
+class DirEngine : public AbstractDirEngine
 {
 public:
-    FileEngine();
+    DirEngine();
 
     QFuture<QString> list() Q_DECL_OVERRIDE;
     QFuture<FileInfo> entryList() Q_DECL_OVERRIDE;

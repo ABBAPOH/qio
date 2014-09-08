@@ -2,7 +2,6 @@
 #define ABSTRACTFILEENGINE_H
 
 #include "file.h"
-#include "fileinfo.h"
 
 #include <QtCore/QFuture>
 
@@ -29,13 +28,6 @@ public:
 
     virtual bool waitForBytesWritten(int msecs = -1) = 0;
     virtual bool waitForReadyRead(int msecs = -1) = 0;
-
-    virtual QFuture<QString> list() = 0;
-    virtual QFuture<FileInfo> entryList() = 0;
-    virtual QFuture<bool> mkdir(const QString &fileName) = 0;
-    // TODO: separate rmdir?
-    virtual QFuture<bool> remove(const QString &fileName) = 0;
-    virtual QFuture<FileInfo> stat(const QString &fileName) = 0;
 
     static AbstractFileEngine *emptyEngine();
 

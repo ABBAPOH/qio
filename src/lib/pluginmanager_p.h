@@ -11,7 +11,8 @@ class PluginManager
 public:
     PluginManager();
 
-    static AbstractFileEngine *createEngine(const QUrl &url);
+    static AbstractFileEngine *createFileEngine(const QUrl &url);
+    static AbstractDirEngine *createDirEngine(const QUrl &url);
 
 private:
     void loadPlugins();

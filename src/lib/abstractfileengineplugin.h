@@ -6,6 +6,7 @@
 #include <QtCore/QUrl>
 
 class AbstractFileEngine;
+class AbstractDirEngine;
 
 class QIO_EXPORT AbstractFileEnginePlugin : public QObject
 {
@@ -15,7 +16,8 @@ public:
     ~AbstractFileEnginePlugin();
 
     virtual QStringList schemes() const = 0;
-    virtual AbstractFileEngine *create(const QString &scheme) const = 0;
+    virtual AbstractFileEngine *createFileEngine(const QString &scheme) const = 0;
+    virtual AbstractDirEngine *createDirEngine(const QString &scheme) const = 0;
 };
 
 #endif // ABSTRACTFILEENGINEHANDLER_H

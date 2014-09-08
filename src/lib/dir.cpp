@@ -6,16 +6,16 @@
 Dir::Dir() :
     d(new DirData)
 {
-    d->engine = AbstractFileEngine::emptyEngine();
+    d->engine = AbstractDirEngine::emptyEngine();
 }
 
 Dir::Dir(const QUrl &url) :
     d(new DirData)
 {
     d->url = url;
-    d->engine = PluginManager::createEngine(url);
+    d->engine = PluginManager::createDirEngine(url);
     if (!d->engine) {
-        d->engine = AbstractFileEngine::emptyEngine();
+        d->engine = AbstractDirEngine::emptyEngine();
     }
 }
 

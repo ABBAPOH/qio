@@ -1,13 +1,13 @@
 #ifndef FILEENGINEWIN_H
 #define FILEENGINEWIN_H
 
-#include "fileengine.h"
+#include <QIO/AbstractFileEngine>
 
 #include <Windows.h>
 
 static const int BUFFER_SIZE =4* 1024;
 
-class FileEngineWin : public FileEngine
+class FileEngineWin : public AbstractFileEngine
 {
 public:
     FileEngineWin();

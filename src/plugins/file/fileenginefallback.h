@@ -1,12 +1,12 @@
 #ifndef FILEENGINEFALLBACK_H
 #define FILEENGINEFALLBACK_H
 
-#include "fileengine.h"
+#include <QIO/AbstractFileEngine>
 
 #include <QtCore/QFile>
 #include <QtCore/QMutex>
 
-class FileEngineFallback : public QObject, public FileEngine
+class FileEngineFallback : public QObject, public AbstractFileEngine
 {
     Q_OBJECT
 public:
