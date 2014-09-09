@@ -158,6 +158,20 @@ QUrl FileSystemModel::rootUrl() const
     return d->rootUrl;
 }
 
+QString FileSystemModel::getNonExistentFileName(const QString &name) const
+{
+    QSet<QString> fileNames;
+    const int rows = rowCount();
+    for (int i = 0; i < rows; ++i)
+        fileNames.insert(index(i, ColumnName).data().toString());
+
+    QString result = name;
+    int count = 0;
+    while (fileNames.contains(result))
+        result = tr("%1 %2").arg(name).arg(++count);
+    return result;
+}
+
 void FileSystemModel::setRootUrl(const QUrl &url)
 {
     Q_D(FileSystemModel);

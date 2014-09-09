@@ -38,6 +38,8 @@ public:
 
     QUrl rootUrl() const;
 
+    QString getNonExistentFileName(const QString &name) const;
+
 public slots:
     void setRootUrl(const QUrl &url);
     void refresh();

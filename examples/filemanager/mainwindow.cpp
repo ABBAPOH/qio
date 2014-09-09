@@ -5,6 +5,7 @@
 #include <QIO/FileSystemModel>
 
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QInputDialog>
 #include <QtCore/QDir>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -30,8 +31,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::mkdir()
 {
+    const QString name = QInputDialog::getText(this,
+                                               tr("New folder"),
+                                               tr("Enter folder name"),
+                                               QLineEdit::Normal,
+                                               m_model->getNonExistentFileName(tr("New folder")));
+    if (name.isEmpty())
+        return;
+
     Dir dir(m_model->rootUrl());
-    dir.mkdir("New folder");
+    dir.mkdir(name);
 }
 
 void MainWindow::setupToolBar()
