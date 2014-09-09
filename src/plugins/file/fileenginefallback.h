@@ -41,7 +41,8 @@ private:
         mutable QMutex mutex;
     } data;
 
-    QFuture<bool> openFuture;
+    QFutureWatcher<bool> *openWatcher;
+    QFutureWatcher<void> *readWatcher;
 };
 
 #endif // FILEENGINEFALLBACK_H

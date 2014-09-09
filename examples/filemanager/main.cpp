@@ -13,7 +13,8 @@
 
 void testFile()
 {
-    const char *const filePath = "C:/Users/arch/Programming/asyncfile/freedesktop.org.xml";
+//    const char *const filePath = "C:/Users/arch/Programming/asyncfile/freedesktop.org.xml";
+    const char *const filePath = "/Users/arch/cardbase.xml";
 
     qDebug() << "main" << QThread::currentThreadId();
 
