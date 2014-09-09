@@ -33,7 +33,7 @@ AbstractFileEngine *FileEnginePlugin::createFileEngine(const QString &scheme) co
 
 AbstractDirEngine *FileEnginePlugin::createDirEngine(const QString &scheme) const
 {
-    if (scheme != "qrc" || scheme != "file")
+    if (scheme != "qrc" && scheme != "file")
         return Q_NULLPTR;
 
     return new DirEngine;
