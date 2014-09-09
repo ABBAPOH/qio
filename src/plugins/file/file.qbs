@@ -10,8 +10,8 @@ Plugin {
         "direngine.h",
         "fileenginefallback.cpp",
         "fileenginefallback.h",
-        "fileengineplugin.cpp",
-        "fileengineplugin.h"
+        "fileplugin.cpp",
+        "fileplugin.h"
     ]
 
     Group {

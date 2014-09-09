@@ -1,19 +1,19 @@
-#ifndef FILEENGINEPLUGIN_H
-#define FILEENGINEPLUGIN_H
+#ifndef FILEPLUGIN_H
+#define FILEPLUGIN_H
 
 #include <QtCore/QtPlugin>
 #include <QIO/AbstractFileEnginePlugin>
 
-class FileEnginePlugin : public AbstractFileEnginePlugin
+class FilePlugin : public AbstractFileEnginePlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "com.arch.QIO.FileEnginePlugin")
+    Q_PLUGIN_METADATA(IID "com.arch.QIO.FilePlugin")
 public:
-    explicit FileEnginePlugin(QObject *parent = 0);
+    explicit FilePlugin(QObject *parent = 0);
 
     QStringList schemes() const Q_DECL_OVERRIDE;
     AbstractFileEngine *createFileEngine(const QString &scheme) const Q_DECL_OVERRIDE;
     AbstractDirEngine *createDirEngine(const QString &scheme) const Q_DECL_OVERRIDE;
 };
 
-#endif // FILEENwGINEPLUGIN_H
+#endif // FILEPLUGIN_H

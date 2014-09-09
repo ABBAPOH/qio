@@ -1,4 +1,4 @@
-#include "fileengineplugin.h"
+#include "fileplugin.h"
 
 #include "direngine.h"
 #ifdef Q_OS_WIN
@@ -6,17 +6,17 @@
 #endif
 #include "fileenginefallback.h"
 
-FileEnginePlugin::FileEnginePlugin(QObject *parent) :
+FilePlugin::FilePlugin(QObject *parent) :
     AbstractFileEnginePlugin(parent)
 {
 }
 
-QStringList FileEnginePlugin::schemes() const
+QStringList FilePlugin::schemes() const
 {
     return QStringList() << "file" << "qrc";
 }
 
-AbstractFileEngine *FileEnginePlugin::createFileEngine(const QString &scheme) const
+AbstractFileEngine *FilePlugin::createFileEngine(const QString &scheme) const
 {
     if (scheme == "qrc")
         return new FileEngineFallback;
@@ -31,7 +31,7 @@ AbstractFileEngine *FileEnginePlugin::createFileEngine(const QString &scheme) co
 #endif
 }
 
-AbstractDirEngine *FileEnginePlugin::createDirEngine(const QString &scheme) const
+AbstractDirEngine *FilePlugin::createDirEngine(const QString &scheme) const
 {
     if (scheme != "qrc" && scheme != "file")
         return Q_NULLPTR;
