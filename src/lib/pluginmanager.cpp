@@ -21,7 +21,8 @@ AbstractFileEngine *PluginManager::createFileEngine(const QUrl &url)
     if (!handler)
         return 0;
     AbstractFileEngine *result = handler->createFileEngine(url.scheme());
-    result->setUrl(url);
+    if (result)
+        result->setUrl(url);
     return result;
 }
 
@@ -31,7 +32,8 @@ AbstractDirEngine *PluginManager::createDirEngine(const QUrl &url)
     if (!handler)
         return 0;
     AbstractDirEngine *result = handler->createDirEngine(url.scheme());
-    result->setUrl(url);
+    if (result)
+        result->setUrl(url);
     return result;
 }
 
