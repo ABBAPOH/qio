@@ -33,11 +33,8 @@ Project {
 
     name: "QIO"
 
-    SubProject {
-        filePath: "examples/examples.qbs"
-    }
-    SubProject {
-        filePath: "src/src.qbs"
-    }
+    SubProject { filePath: "examples/examples.qbs" }
+    SubProject { filePath: "src/src.qbs" }
+    SubProject { filePath: "tests/tests.qbs" }
 }
 
