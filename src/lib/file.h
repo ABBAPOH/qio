@@ -20,6 +20,7 @@ public:
     enum State { Closed, Opening, Opened };
 
     explicit File(QObject *parent = 0);
+    explicit File(const QUrl &url, QObject *parent = 0);
     ~File();
 
     bool open(OpenMode mode);

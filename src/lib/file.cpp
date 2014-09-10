@@ -14,6 +14,7 @@ void FilePrivate::init()
     openMode = QIODevice::NotOpen;
     bufferSize = 10*1024*1024; // 10 Mb
     chunkSize = 4*1024; // 4 Kb
+    engine = AbstractFileEngine::emptyEngine();
 }
 
 void FilePrivate::openFinished(bool ok)
@@ -56,7 +57,16 @@ File::File(QObject *parent) :
 {
     Q_D(File);
     d->init();
-    d->engine = AbstractFileEngine::emptyEngine();
+}
+
+File::File(const QUrl &url, QObject *parent) :
+    QIODevice(parent),
+    d_ptr(new FilePrivate(this))
+{
+    Q_D(File);
+    d->init();
+
+    setUrl(url);
 }
 
 File::~File()
