@@ -2,6 +2,7 @@
 #define FILEINFO_H
 
 #include <QtCore/QDateTime>
+#include <QtCore/QDebug>
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QUrl>
 
@@ -34,5 +35,21 @@ public:
 private:
     QSharedDataPointer<FileInfoData> d;
 };
+
+inline bool operator ==(const FileInfo &lhs, const FileInfo &rhs)
+{
+    return lhs.url() == rhs.url();
+}
+
+inline uint qHash(const FileInfo &info, uint seed)
+{
+    return qHash(info.url(), seed);
+}
+
+inline QDebug operator<<(QDebug debug, const FileInfo &info)
+{
+    debug << QString("FileInfo(%1)").arg(info.url().toString());
+    return debug;
+}
 
 #endif // FILEINFO_H

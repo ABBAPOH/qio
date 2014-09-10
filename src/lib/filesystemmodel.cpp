@@ -215,21 +215,55 @@ void FileSystemModel::onFinished()
     if (!parentItem)
         return;
 
-    qDebug() << "onFinished" << url << future.resultCount();
-    int count = future.resultCount();
-    if (count == 0)
-        return;
-
-    beginInsertRows(d->index(parentItem), 0, count - 1);
-    for (int i = 0; i < count; ++i) {
-        TreeItem *child = new TreeItem(parentItem);
-        child->info = future.resultAt(i);
-        d->itemHash.insert(child->info.url(), child);
-        parentItem->children().append(child);
+    QSet<FileInfo> oldSet;
+    const int childCount = parentItem->childCount();
+    for (int i = 0; i < childCount; ++i) {
+        TreeItem *child = parentItem->child(i);
+        oldSet.insert(child->info);
     }
-    endInsertRows();
 
-    qDebug() << parentItem->childCount() << count << rowCount(d->index(parentItem));
-    Q_ASSERT(rowCount(d->index(parentItem)) == count);
+    QSet<FileInfo> newSet;
+    const int count = future.resultCount();
+    for (int i = 0; i < count; ++i) {
+        newSet.insert(future.resultAt(i));
+    }
+
+    QSet<FileInfo> toInsert = newSet;
+    toInsert.subtract(oldSet);
+
+    QSet<FileInfo> toRemove = oldSet;
+    toRemove.subtract(newSet);
+
+    const QModelIndex parentIndex = d->index(parentItem);
+    foreach (const FileInfo &info, toRemove) {
+        TreeItem *item = d->itemHash.take(info.url());
+        const int row = item->row();
+        beginRemoveRows(parentIndex, row, row);
+        delete item;
+        endRemoveRows();
+    }
+
+    const auto lessThan = [](TreeItem *lhs, TreeItem *rhs)
+    {
+        return lhs->info.fileName() < rhs->info.fileName();
+    };
+
+    foreach (const FileInfo &info, toInsert) {
+        TreeItem *child = new TreeItem(parentItem);
+        child->info = info;
+
+        auto it = std::lower_bound(parentItem->children().begin(),
+                                   parentItem->children().end(),
+                                   child,
+                                   lessThan);
+
+        const int row = it - parentItem->children().begin();
+        beginInsertRows(parentIndex, row, row);
+        parentItem->children().insert(it, child);
+        d->itemHash.insert(child->info.url(), child);
+        endInsertRows();
+    }
+
     parentItem->state = FileSystemModelPrivate::TreeItem::PopulatedState;
+    Q_ASSERT(rowCount(d->index(parentItem)) == count);
 }
