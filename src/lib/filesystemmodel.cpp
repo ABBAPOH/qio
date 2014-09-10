@@ -3,6 +3,8 @@
 
 #include "dir.h"
 
+#include <QtCore/QFutureWatcher>
+
 typedef FileSystemModelPrivate::TreeItem TreeItem;
 
 FileSystemModelPrivate::FileSystemModelPrivate(FileSystemModel *qq) :
@@ -29,7 +31,7 @@ FileSystemModelPrivate::TreeItem *FileSystemModelPrivate::item(const QModelIndex
 
 TreeItem::TreeItem(TreeItem *parent) :
     m_parent(parent),
-    populated(false)
+    state(NoState)
 {
 }
 
@@ -131,25 +133,12 @@ bool FileSystemModel::canFetchMore(const QModelIndex &parent) const
 //    qDebug() << "canFetchMore" << item->info.url() << item->populated;
 //    if (item == d->root)
 //        return !d->root->populated;
-    return !item->populated;
+    return item->state == FileSystemModelPrivate::TreeItem::NoState;
 }
 
-#include <QFutureWatcher>
 void FileSystemModel::fetchMore(const QModelIndex &parent)
 {
-    Q_D(FileSystemModel);
-
-    TreeItem *item = d->item(parent);
-
-    const QUrl url = item == d->root ? d->rootUrl : item->info.url();
-    qDebug() << "fetchMore" << url << item->populated;
-    QFutureWatcher<FileInfo> *watcher = new QFutureWatcher<FileInfo>(this);
-    watcher->setProperty("url", url);
-    connect(watcher, &QFutureWatcherBase::finished, this, &FileSystemModel::onFinished);
-
-    Dir dir(url);
-    watcher->setFuture(dir.entryList());
-    item->populated = true;
+    refresh(parent);
 }
 
 QUrl FileSystemModel::rootUrl() const
@@ -183,6 +172,22 @@ void FileSystemModel::setRootUrl(const QUrl &url)
     refresh();
 }
 
+void FileSystemModel::refresh(const QModelIndex &index)
+{
+    Q_D(FileSystemModel);
+    TreeItem *item = d->item(index);
+
+    const QUrl url = item == d->root ? d->rootUrl : item->info.url();
+    qDebug() << "fetchMore" << url << item->state;
+    QFutureWatcher<FileInfo> *watcher = new QFutureWatcher<FileInfo>(this);
+    watcher->setProperty("url", url);
+    connect(watcher, &QFutureWatcherBase::finished, this, &FileSystemModel::onFinished);
+
+    Dir dir(url);
+    watcher->setFuture(dir.entryList());
+    item->state = FileSystemModelPrivate::TreeItem::PopulatingState;
+}
+
 void FileSystemModel::refresh()
 {
     Q_D(FileSystemModel);
@@ -200,8 +205,7 @@ void FileSystemModel::onFinished()
 {
     Q_D(FileSystemModel);
 
-    QFutureWatcherBase *baseWatcher = qobject_cast< QFutureWatcherBase *>(sender());
-    QFutureWatcher<FileInfo> *watcher = static_cast< QFutureWatcher<FileInfo> *>(baseWatcher);
+    QFutureWatcher<FileInfo> *watcher = static_cast< QFutureWatcher<FileInfo> *>(sender());
     QFuture<FileInfo> future = watcher->future();
     if (future.isCanceled())
         return;
@@ -211,7 +215,6 @@ void FileSystemModel::onFinished()
     if (!parentItem)
         return;
 
-//    parentItem->populated = true;
     qDebug() << "onFinished" << url << future.resultCount();
     int count = future.resultCount();
     if (count == 0)
@@ -228,4 +231,5 @@ void FileSystemModel::onFinished()
 
     qDebug() << parentItem->childCount() << count << rowCount(d->index(parentItem));
     Q_ASSERT(rowCount(d->index(parentItem)) == count);
+    parentItem->state = FileSystemModelPrivate::TreeItem::PopulatedState;
 }

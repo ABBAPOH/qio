@@ -34,13 +34,15 @@ struct FileSystemModelPrivate::TreeItem
     inline TreeItem *parent() const { return m_parent; }
     inline int row() const { return m_parent ? m_parent->m_children.indexOf((TreeItem *)this) : 0; }
 
+    enum State { NoState = 0, PopulatingState, PopulatedState };
+
 private:
     TreeItem *m_parent;
     QList<TreeItem *> m_children;
 
 public:
     FileInfo info;
-    bool populated;
+    State state;
 };
 
 #endif // FILESYSTEMMODEL_P_H

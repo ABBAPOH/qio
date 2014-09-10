@@ -42,6 +42,7 @@ public:
 
 public slots:
     void setRootUrl(const QUrl &url);
+    void refresh(const QModelIndex &index);
     void refresh();
 
 signals:
