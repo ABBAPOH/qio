@@ -27,6 +27,7 @@ private:
 private slots:
     void onRootUrlChanged(const QUrl &url);
     void onTextEdited(const QString &text);
+    void onMkdirFinished();
 
 private:
     Ui::MainWindow *ui;

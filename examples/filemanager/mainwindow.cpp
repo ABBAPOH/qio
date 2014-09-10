@@ -4,9 +4,12 @@
 #include <QIO/Dir>
 #include <QIO/FileSystemModel>
 
+#include <QtWidgets/QMessageBox>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QInputDialog>
+
 #include <QtCore/QDir>
+#include <QtCore/QFutureWatcher>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -40,7 +43,10 @@ void MainWindow::mkdir()
         return;
 
     Dir dir(m_model->rootUrl());
-    dir.mkdir(name);
+    auto future = dir.mkdir(name);
+    QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>(this);
+    connect(watcher, &QFutureWatcherBase::finished, this, &MainWindow::onMkdirFinished);
+    watcher->setFuture(future);
 }
 
 void MainWindow::setupToolBar()
@@ -59,4 +65,21 @@ void MainWindow::onRootUrlChanged(const QUrl &url)
 void MainWindow::onTextEdited(const QString &text)
 {
     m_model->setRootUrl(QUrl::fromUserInput(text));
+}
+
+void MainWindow::onMkdirFinished()
+{
+    auto watcher = static_cast<QFutureWatcher<bool> *>(sender());
+    auto future = watcher->future();
+
+    bool ok = future.result();
+    if (!ok) {
+        QMessageBox::warning(this,
+                             tr("Create folder"),
+                             tr("Can't create folder"),
+                             QMessageBox::Close);
+        return;
+    }
+
+    m_model->refresh(QModelIndex());
 }
