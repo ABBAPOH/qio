@@ -16,6 +16,9 @@ private slots:
     void open();
     void read_data();
     void read();
+    void readBench_data();
+    void readBench();
+    void readQFileBench();
 
 private:
     QTemporaryDir dir;
@@ -97,6 +100,68 @@ void tst_File::read()
     }
 
     QVERIFY(qFile.atEnd());
+    qFile.remove();
+}
+
+void tst_File::readBench_data()
+{
+    QString fileName = "medium.txt";
+    const QString path = dir.path() + "/" + fileName + "1";
+//    QVERIFY(QFile::copy(":/" + fileName, path));
+    QFile f(":/" + fileName);
+    f.copy(path);
+    qDebug() << f.errorString();
+}
+
+void tst_File::readBench()
+{
+    QString fileName = "medium.txt";
+    const QString path = dir.path() + "/" + fileName + "1";
+//    QFile qFile(path);
+    File file(QUrl::fromLocalFile(path));
+//    QVERIFY(qFile.open(QIODevice::ReadOnly));
+    QVERIFY(file.open(QIODevice::ReadOnly));
+
+    QByteArray data;
+    QByteArray lowered;
+    QByteArray uppered;
+    QByteArray base64;
+
+    QBENCHMARK {
+        while (!file.atEnd()) {
+            QVERIFY(file.waitForReadyRead());
+            qint64 bytes = file.bytesAvailable();
+            const QByteArray data1 = file.read(bytes);
+            data.append(data1);
+            lowered.append(data1.toLower());
+            uppered.append(data1.toUpper());
+            base64 = data1.toBase64();
+        }
+    }
+}
+
+void tst_File::readQFileBench()
+{
+    QString fileName = "medium.txt";
+    const QString path = dir.path() + "/" + fileName + "1";
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::ReadOnly));
+
+    QByteArray data;
+    QByteArray lowered;
+    QByteArray uppered;
+    QByteArray base64;
+
+    QBENCHMARK {
+        while (!file.atEnd()) {
+            qint64 bytes = 4096;
+            const QByteArray data1 = file.read(bytes);
+            data.append(data1);
+            lowered.append(data1.toLower());
+            uppered.append(data1.toUpper());
+            base64 = data1.toBase64();
+        }
+    }
 }
 
 QTEST_MAIN(tst_File)
