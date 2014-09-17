@@ -39,7 +39,6 @@ void FilePrivate::openFinished(bool ok)
 void FilePrivate::readFinished(const char *data, qint64 length)
 {
     Q_Q(File);
-    qDebug() << "FilePrivate::readFinished" << length;
     if (length <= 0)
         return;
 
@@ -72,6 +71,7 @@ File::File(const QUrl &url, QObject *parent) :
 File::~File()
 {
     Q_D(File);
+    close();
     if (d->engine != AbstractFileEngine::emptyEngine())
         delete d->engine;
     delete d_ptr;
@@ -122,6 +122,11 @@ bool File::seek(qint64 pos)
     return d->engine->seek(pos);
 }
 
+bool File::atEnd() const
+{
+    return pos() == size();
+}
+
 qint64 File::bytesAvailable() const
 {
     Q_D(const File);
@@ -142,6 +147,10 @@ bool File::waitForBytesWritten(int msecs)
 bool File::waitForReadyRead(int msecs)
 {
     Q_D(File);
+    if (!isOpen())
+        return false;
+    if (bytesAvailable() > 0)
+        return true;
     return d->engine->waitForReadyRead(msecs);
 }
 
@@ -219,10 +228,10 @@ void File::onOpenFinished()
     if (ok) {
         d->state = File::Opened;
 //        size = size;
-        QIODevice::open(d->openMode);
-        if (d->openMode & QIODevice::Unbuffered)
-            d->buffer.reserve(d->chunkSize);
-        else
+        QIODevice::open(d->openMode | QIODevice::Unbuffered);
+//        if (d->openMode & QIODevice::Unbuffered)
+//            d->buffer.reserve(d->chunkSize);
+//        else
             d->buffer.reserve(d->bufferSize);
         if (d->openMode & QIODevice::ReadOnly)
             d->engine->read(d->chunkSize);

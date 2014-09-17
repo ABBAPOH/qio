@@ -1,5 +1,7 @@
 import qbs.base 1.0
 
 Project {
-    references: []
+    references: [
+        "file/file.qbs"
+    ]
 }

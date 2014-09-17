@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>freedesktop.org.xml</file>
+        <file>small.txt</file>
+        <file>medium.txt</file>
+    </qresource>
+</RCC>

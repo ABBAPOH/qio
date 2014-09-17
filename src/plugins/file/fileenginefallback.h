@@ -37,12 +37,12 @@ private:
         ThreadData() : file(Q_NULLPTR) {}
 
         QFile *file;
-        QByteArray readBuffer;
         mutable QMutex mutex;
     } data;
 
     QFutureWatcher<bool> *openWatcher;
-    QFutureWatcher<void> *readWatcher;
+    QFutureWatcher<QByteArray> *readWatcher;
+    bool reading {false};
 };
 
 #endif // FILEENGINEFALLBACK_H

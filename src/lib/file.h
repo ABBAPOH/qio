@@ -30,6 +30,7 @@ public:
 
     qint64 size() const;
     bool seek(qint64 pos);
+    bool atEnd() const Q_DECL_OVERRIDE;
 
     qint64 bytesAvailable() const;
     qint64 bytesToWrite() const;

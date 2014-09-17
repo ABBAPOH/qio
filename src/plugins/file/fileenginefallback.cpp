@@ -6,7 +6,7 @@
 FileEngineFallback::FileEngineFallback(QObject *parent) :
     AbstractFileEngine(parent),
     openWatcher(new QFutureWatcher<bool>(this)),
-    readWatcher(new QFutureWatcher<void>(this))
+    readWatcher(new QFutureWatcher<QByteArray>(this))
 {
     data.file = new QFile();
 
@@ -66,14 +66,17 @@ qint64 FileEngineFallback::size() const
 
 void FileEngineFallback::read(qint64 maxlen)
 {
-    typedef void (*func)(QFutureInterface<void> &future, ThreadData *data, qint64 maxlen);
-    func f = [](QFutureInterface<void> &/*future*/, ThreadData *data, qint64 maxlen) {
+    typedef void (*func)(QFutureInterface<QByteArray> &future, ThreadData *data, qint64 maxlen);
+    func f = [](QFutureInterface<QByteArray> &future, ThreadData *data, qint64 maxlen) {
         QMutexLocker l(&data->mutex);
-        data->readBuffer.clear();
-        data->readBuffer.resize(maxlen);
-        maxlen = data->file->read(data->readBuffer.data(), maxlen);
-        data->readBuffer.resize(maxlen);
+        QByteArray buffer;
+        buffer.resize(maxlen);
+        maxlen = data->file->read(buffer.data(), maxlen);
+        buffer.resize(maxlen);
+        future.reportResult(buffer);
     };
+    Q_ASSERT(!reading);
+    reading = true;
     readWatcher->setFuture(QtConcurrent::run(f, &data, maxlen));
 }
 
@@ -86,12 +89,12 @@ bool FileEngineFallback::waitForBytesWritten(int msecs)
 bool FileEngineFallback::waitForReadyRead(int msecs)
 {
     Q_UNUSED(msecs);
-    auto future = readWatcher->future();
-    if (future == QFuture<bool>())
+    if (!reading)
         return false;
+    auto future = readWatcher->future();
     future.waitForFinished();
     onReadFinished();
-    return false;
+    return true;
 }
 
 void FileEngineFallback::onOpenFinished()
@@ -105,10 +108,9 @@ void FileEngineFallback::onOpenFinished()
 
 void FileEngineFallback::onReadFinished()
 {
-    auto future = readWatcher->future();
-    if (future == QFuture<bool>())
+    if (!reading)
         return;
-    QMutexLocker l(&data.mutex);
-    readFinished(data.readBuffer.constData(), data.readBuffer.length());
-    readWatcher->setFuture(QFuture<bool>());
+    reading = false;
+    auto buffer = readWatcher->future().result();
+    readFinished(buffer.constData(), buffer.length());
 }
