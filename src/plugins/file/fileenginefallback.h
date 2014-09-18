@@ -4,6 +4,7 @@
 #include <QIO/AbstractFileEngine>
 
 #include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 #include <QtCore/QMutex>
 
 class FileEngineFallback : public AbstractFileEngine
@@ -40,6 +41,7 @@ private:
         mutable QMutex mutex;
     } data;
 
+    mutable QFileInfo fileInfo;
     QFutureWatcher<bool> *openWatcher;
     QFutureWatcher<QByteArray> *readWatcher;
     bool reading {false};

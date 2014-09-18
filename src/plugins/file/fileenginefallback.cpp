@@ -19,7 +19,9 @@ void FileEngineFallback::setUrl(const QUrl &url)
     AbstractFileEngine::setUrl(url);
 
     QMutexLocker l(&data.mutex);
-    data.file->setFileName(url.toLocalFile());
+    const QString path = url.toLocalFile();
+    data.file->setFileName(path);
+    fileInfo.setFile(path);
 }
 
 void FileEngineFallback::open(QIODevice::OpenMode mode)
@@ -60,8 +62,8 @@ bool FileEngineFallback::seek(qint64 pos)
 
 qint64 FileEngineFallback::size() const
 {
-    QMutexLocker l(&data.mutex);
-    return data.file->size();
+    fileInfo.refresh();
+    return fileInfo.size();
 }
 
 void FileEngineFallback::read(qint64 maxlen)
