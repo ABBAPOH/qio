@@ -19,8 +19,10 @@ static QString errorMessage(DWORD error)
 }
 
 FileEngineWin::FileEngineWin() :
+    m_FileHandle(INVALID_HANDLE_VALUE),
     reading(false),
-    overlapped(this),
+    activeOverlapped(new MyOverlapped(this)),
+    inactiveOverlapped(new MyOverlapped(this)),
     pos(0)
 {
 }
@@ -30,21 +32,18 @@ void FileEngineWin::open(QIODevice::OpenMode mode)
     const QString path = url().toLocalFile();
     m_FileHandle = CreateFile(reinterpret_cast<const wchar_t *>(path.data()), // file to open
                               GENERIC_READ,           // open for reading
-                              FILE_SHARE_READ,        // share for reading
+                              FILE_SHARE_READ | FILE_SHARE_DELETE,        // share for reading
                               NULL,                   // default security
                               OPEN_EXISTING,          // existing file only
                               FILE_FLAG_OVERLAPPED,   // overlapped operation
                               NULL);                  // no attr. template
 
+    qDebug() << "FileEngineWin::open" << qintptr(m_FileHandle), 16;
     if (m_FileHandle == INVALID_HANDLE_VALUE) {
         openFinished(false);
         return;
     }
 
-//    if (!asyncRead(pos())) {
-//        setError(QFileDevice::OpenError, errorMessage(GetLastError()));
-//        return false;
-//    }
     openFinished(true);
 }
 
@@ -55,6 +54,11 @@ bool FileEngineWin::waitForOpened(int msecs)
 
 void FileEngineWin::close()
 {
+    if (!m_FileHandle)
+        return;
+
+    CloseHandle(m_FileHandle);
+    m_FileHandle = INVALID_HANDLE_VALUE;
 }
 
 bool FileEngineWin::seek(qint64 pos)
@@ -75,33 +79,30 @@ qint64 FileEngineWin::size() const
 
 void FileEngineWin::read(qint64 maxlen)
 {
-    qDebug() << "FileEngineWin::read" << maxlen;
+    qDebug() << "FileEngineWin::read" << "maxlen =" << maxlen;
     if (reading)
         return;
 
-//    qint64 bytes = qMin(BUFFER_SIZE, MAX_BUFFER_SIZE - m_readBuffer.size());
-    qint64 bytes = maxlen;
+    if (!m_FileHandle)
+        return;
+
+    readBuffer.resize(maxlen);
     const qint64 offset = pos;
-//    bytes = qMin(bytes, size() - offset);
-//    qDebug() << "asyncRead" << "pos" << pos << "size" << size() << "bytes" << bytes;
-//    if (bytes <= 0)
-//        return true;
-//    Q_ASSERT(offset + bytes <= size());
-    overlapped.Offset = offset;
+    activeOverlapped->Offset = offset;
+    qDebug() << "FileEngineWin::read" << "active" << QString::number(qintptr(activeOverlapped.data()), 16);
+    qDebug() << "FileEngineWin::read" << "inactive" << QString::number(qintptr(inactiveOverlapped.data()), 16);
 
     bool ok = ReadFileEx(m_FileHandle,
-                         overlapped.buffer,
-                         bytes,
+                         readBuffer.data(),
+                         maxlen,
 //                             &dwBytesRead,
-                         &overlapped,
+                         activeOverlapped.data(),
                          &readCallback);
     if (!ok) {
         qWarning() << "ReadFileEx failed" << errorMessage(GetLastError());
 //        setError(QFileDevice::ReadError, errorMessage(GetLastError()) );
     }
     reading = ok;
-    qDebug() << "asyncRead" << "finished" << ok;
-//    return ok;
 }
 
 bool FileEngineWin::waitForBytesWritten(int msecs)
@@ -111,7 +112,7 @@ bool FileEngineWin::waitForBytesWritten(int msecs)
 
 bool FileEngineWin::waitForReadyRead(int msecs)
 {
-    DWORD result = WaitForSingleObjectEx(overlapped.hEvent, msecs, true);
+    DWORD result = WaitForSingleObjectEx(activeOverlapped->hEvent, msecs, true);
 //    qDebug() << "waitForReadyRead finished" << errorMessage(dwWaitOvpOprn);
     switch (result) {
     case WAIT_FAILED:
@@ -127,10 +128,12 @@ bool FileEngineWin::waitForReadyRead(int msecs)
 
 void FileEngineWin::readCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED overlapped)
 {
-    qDebug() << "readCallback" << numberOfBytesTransfered;
-    MyOverlapped *myOverlapped = reinterpret_cast<MyOverlapped *>(overlapped);
-    myOverlapped->engine->reading = false;
-    myOverlapped->engine->pos += numberOfBytesTransfered;
-    myOverlapped->engine->readFinished(myOverlapped->buffer, numberOfBytesTransfered);
-
+    qDebug() << "FileEngineWin::readCallback" << "overlapped" << QString::number(qintptr(overlapped), 16);
+    qDebug() << "FileEngineWin::readCallback" << "numberOfBytesTransfered = " << numberOfBytesTransfered;
+    MyOverlapped *myOverlapped = static_cast<MyOverlapped *>(overlapped);
+    FileEngineWin *engine = myOverlapped->engine;
+    engine->reading = false;
+    engine->pos += numberOfBytesTransfered;
+    engine->activeOverlapped.swap(engine->inactiveOverlapped);
+    engine->readFinished(engine->readBuffer.data(), numberOfBytesTransfered);
 }

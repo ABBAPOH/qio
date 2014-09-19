@@ -5,8 +5,6 @@
 
 #include <Windows.h>
 
-static const int BUFFER_SIZE =4* 1024;
-
 class FileEngineWin : public AbstractFileEngine
 {
 public:
@@ -24,7 +22,7 @@ public:
     bool waitForReadyRead(int msecs) Q_DECL_OVERRIDE;
 
 private:
-    static void readCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED overlapped);
+    static void readCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED activeOverlapped);
 
 private:
     HANDLE m_FileHandle;
@@ -34,17 +32,24 @@ private:
     {
         MyOverlapped(FileEngineWin *engine)
         {
-//            Q_ASSERT((void *)&overlapped == (void *)this);
+            Q_ASSERT(qintptr(static_cast<LPOVERLAPPED>(this)) == qintptr(this));
             memset(this, 0, sizeof(MyOverlapped));
             hEvent = CreateEvent(0,TRUE,FALSE,0);
+            qDebug() << "MyOverlapped" << "hEvent =" << QString::number(qintptr(hEvent), 16);
             this->engine = engine;
+        }
+        ~MyOverlapped()
+        {
+            CloseHandle(hEvent);
         }
 
         FileEngineWin *engine;
-        char buffer[BUFFER_SIZE];
     };
 
-    MyOverlapped overlapped;
+    QScopedPointer<MyOverlapped> activeOverlapped;
+    QScopedPointer<MyOverlapped> inactiveOverlapped;
+//    char readBuffer[BUFFER_SIZE];
+    QByteArray readBuffer;
     qint64 pos;
 };
 
