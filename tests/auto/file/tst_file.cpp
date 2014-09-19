@@ -5,6 +5,16 @@
 #include <QtCore/QFile>
 #include <QtCore/QTemporaryDir>
 
+static bool copyFile(const QString &from, const QString &to)
+{
+    bool ok = QFile::copy(from, to);
+    if (ok) {
+        QFile file(to);
+        ok = file.setPermissions(file.permissions() | QFileDevice::WriteOwner);
+    }
+    return ok;
+}
+
 class tst_File : public QObject
 {
     Q_OBJECT
@@ -52,18 +62,20 @@ void tst_File::initTestCase()
 
 void tst_File::open()
 {
+    const QString path = dir.path() + "/" + "tst_open.txt";
+    QVERIFY(copyFile(":/small.txt", path));
     {
-        const QString path = dir.path() + "/" + "small.txt";
-        QVERIFY(QFile::copy(":/small.txt", path));
         File f(QUrl::fromLocalFile(path));
         QVERIFY(f.open(QIODevice::ReadOnly));
-        QVERIFY(QFile::remove(path));
+        f.close();
     }
 
     {
         File f(QUrl::fromLocalFile("notexist.txt"));
         QVERIFY(!f.open(QIODevice::ReadOnly));
     }
+
+    QVERIFY(QFile::remove(path));
 }
 
 void tst_File::read_data()
@@ -79,7 +91,7 @@ void tst_File::read()
 {
     QFETCH(QString, fileName);
     const QString path = dir.path() + "/" + fileName;
-    QVERIFY(QFile::copy(":/" + fileName, path));
+    QVERIFY(copyFile(":/" + fileName, path));
     QFile qFile(path);
     File file(QUrl::fromLocalFile(path));
     QVERIFY(qFile.open(QIODevice::ReadOnly));
@@ -107,10 +119,7 @@ void tst_File::readBench_data()
 {
     QString fileName = "medium.txt";
     const QString path = dir.path() + "/" + fileName + "1";
-//    QVERIFY(QFile::copy(":/" + fileName, path));
-    QFile f(":/" + fileName);
-    f.copy(path);
-    qDebug() << f.errorString();
+    copyFile(":/" + fileName, path);
 }
 
 void tst_File::readBench()
