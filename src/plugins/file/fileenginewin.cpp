@@ -1,5 +1,10 @@
 #include "fileenginewin.h"
 
+#include <QIO/RunExtensions>
+
+typedef QFuture<HANDLE> OpenFuture;
+typedef QFutureInterface<HANDLE> OpenFutureInterface;
+
 static QString errorMessage(DWORD error)
 {
     void *lpMsgBuf;
@@ -19,35 +24,46 @@ static QString errorMessage(DWORD error)
 }
 
 FileEngineWin::FileEngineWin() :
+    openWatcher(new QFutureWatcher<HANDLE>(this)),
     m_FileHandle(INVALID_HANDLE_VALUE),
     reading(false),
     activeOverlapped(new MyOverlapped(this)),
     inactiveOverlapped(new MyOverlapped(this)),
     pos(0)
 {
+    connect(openWatcher, &QFutureWatcherBase::finished, this, &FileEngineWin::onOpenFinished);
 }
 
 void FileEngineWin::open(QIODevice::OpenMode mode)
 {
+    typedef void (*func)(OpenFutureInterface &future, const QString path, QIODevice::OpenMode mode);
+    func f = [](OpenFutureInterface &future, const QString path, QIODevice::OpenMode mode) {
+        HANDLE fileHandle = CreateFile(reinterpret_cast<const wchar_t *>(path.data()), // file to open
+                                       GENERIC_READ,           // open for reading
+                                       FILE_SHARE_READ | FILE_SHARE_DELETE,        // share for reading
+                                       NULL,                   // default security
+                                       OPEN_EXISTING,          // existing file only
+                                       FILE_FLAG_OVERLAPPED,   // overlapped operation
+                                       NULL);                  // no attr. template
+
+        if (fileHandle == INVALID_HANDLE_VALUE) {
+            qWarning() << "failed to open file" << GetLastError();
+        }
+
+        future.reportResult(fileHandle);
+    };
     const QString path = url().toLocalFile();
-    m_FileHandle = CreateFile(reinterpret_cast<const wchar_t *>(path.data()), // file to open
-                              GENERIC_READ,           // open for reading
-                              FILE_SHARE_READ | FILE_SHARE_DELETE,        // share for reading
-                              NULL,                   // default security
-                              OPEN_EXISTING,          // existing file only
-                              FILE_FLAG_OVERLAPPED,   // overlapped operation
-                              NULL);                  // no attr. template
-
-    if (m_FileHandle == INVALID_HANDLE_VALUE) {
-        openFinished(false);
-        return;
-    }
-
-    openFinished(true);
+    openWatcher->setFuture(QtConcurrent::run(f, path, mode));
 }
 
 bool FileEngineWin::waitForOpened(int msecs)
 {
+    Q_UNUSED(msecs);
+    auto future = openWatcher->future();
+    if (future == OpenFuture())
+        return false;
+    future.waitForFinished();
+    onOpenFinished();
     return true;
 }
 
@@ -154,4 +170,19 @@ void FileEngineWin::readCallback(DWORD errorCode, DWORD numberOfBytesTransfered,
     engine->pos += numberOfBytesTransfered;
     engine->activeOverlapped.swap(engine->inactiveOverlapped);
     engine->readFinished(engine->readBuffer.data(), numberOfBytesTransfered);
+}
+
+void FileEngineWin::onOpenFinished()
+{
+    auto future = openWatcher->future();
+    if (future == OpenFuture())
+        return;
+    m_FileHandle = future.result();
+
+    if (m_FileHandle == INVALID_HANDLE_VALUE)
+        openFinished(false);
+    else
+        openFinished(true);
+
+    openWatcher->setFuture(OpenFuture());
 }

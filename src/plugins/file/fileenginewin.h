@@ -2,7 +2,7 @@
 #define FILEENGINEWIN_H
 
 #include <QIO/AbstractFileEngine>
-
+#include <QtCore/QFutureWatcher>
 #include <Windows.h>
 
 class FileEngineWin : public AbstractFileEngine
@@ -24,7 +24,11 @@ public:
 private:
     static void readCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED activeOverlapped);
 
+private slots:
+    void onOpenFinished();
+
 private:
+    QFutureWatcher<HANDLE> *openWatcher;
     HANDLE m_FileHandle;
     bool reading;
 
