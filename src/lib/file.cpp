@@ -47,7 +47,7 @@ void FilePrivate::readFinished(const char *data, qint64 length)
     memmove(buffer.data() + oldSize, data, length);
     qint64 maxlen = bufferSize - buffer.size();
     maxlen = qMin<qint64>(maxlen, chunkSize);
-//    maxlen = qMin(q->size() - q->pos() + buffer.size(), maxlen);
+    maxlen = qMin(q->size() - (q->pos() + buffer.size()), maxlen);
     if (maxlen > 0)
         engine->read(maxlen);
     emit q->readyRead();

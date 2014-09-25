@@ -84,6 +84,7 @@ qint64 FileEngineWin::size() const
 
 void FileEngineWin::read(qint64 maxlen)
 {
+    Q_ASSERT(maxlen > 0);
 //    qDebug() << "FileEngineWin::read" << "maxlen =" << maxlen;
     if (reading)
         return;
@@ -91,10 +92,6 @@ void FileEngineWin::read(qint64 maxlen)
     if (!m_FileHandle)
         return;
 
-    // TODO: move to File class
-    maxlen = qMin(size() - pos, maxlen);
-    if (maxlen == 0)
-        return;
     readBuffer.resize(maxlen);
     const qint64 offset = pos;
     activeOverlapped->Offset = offset;
