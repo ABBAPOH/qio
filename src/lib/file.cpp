@@ -28,8 +28,10 @@ void FilePrivate::openFinished(bool ok)
             buffer.reserve(chunkSize);
         else
             buffer.reserve(bufferSize);
-        if (openMode & QIODevice::ReadOnly)
-            engine->read(chunkSize);
+        if (openMode & QIODevice::ReadOnly) {
+            qint64 maxlen = qMin<qint64>(chunkSize, q->size());
+            engine->read(maxlen);
+        }
     } else {
         state = File::Closed;
     }
