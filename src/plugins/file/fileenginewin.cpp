@@ -38,7 +38,6 @@ void FileEngineWin::open(QIODevice::OpenMode mode)
                               FILE_FLAG_OVERLAPPED,   // overlapped operation
                               NULL);                  // no attr. template
 
-    qDebug() << "FileEngineWin::open" << qintptr(m_FileHandle), 16;
     if (m_FileHandle == INVALID_HANDLE_VALUE) {
         openFinished(false);
         return;
@@ -54,8 +53,14 @@ bool FileEngineWin::waitForOpened(int msecs)
 
 void FileEngineWin::close()
 {
-    if (!m_FileHandle)
+    if (m_FileHandle == INVALID_HANDLE_VALUE)
         return;
+
+    if (reading) {
+        activeOverlapped->canceled = true;
+        CancelIo(m_FileHandle); // seems has no effect
+        WaitForSingleObjectEx(activeOverlapped->hEvent, -1, true);
+    }
 
     CloseHandle(m_FileHandle);
     m_FileHandle = INVALID_HANDLE_VALUE;
@@ -79,18 +84,23 @@ qint64 FileEngineWin::size() const
 
 void FileEngineWin::read(qint64 maxlen)
 {
-    qDebug() << "FileEngineWin::read" << "maxlen =" << maxlen;
+//    qDebug() << "FileEngineWin::read" << "maxlen =" << maxlen;
     if (reading)
         return;
 
     if (!m_FileHandle)
         return;
 
+    // TODO: move to File class
+    maxlen = qMin(size() - pos, maxlen);
+    if (maxlen == 0)
+        return;
     readBuffer.resize(maxlen);
     const qint64 offset = pos;
     activeOverlapped->Offset = offset;
-    qDebug() << "FileEngineWin::read" << "active" << QString::number(qintptr(activeOverlapped.data()), 16);
-    qDebug() << "FileEngineWin::read" << "inactive" << QString::number(qintptr(inactiveOverlapped.data()), 16);
+    activeOverlapped->canceled = false;
+//    qDebug() << "FileEngineWin::read" << "active" << QString::number(qintptr(activeOverlapped.data()), 16);
+//    qDebug() << "FileEngineWin::read" << "inactive" << QString::number(qintptr(inactiveOverlapped.data()), 16);
 
     bool ok = ReadFileEx(m_FileHandle,
                          readBuffer.data(),
@@ -128,11 +138,22 @@ bool FileEngineWin::waitForReadyRead(int msecs)
 
 void FileEngineWin::readCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED overlapped)
 {
-    qDebug() << "FileEngineWin::readCallback" << "overlapped" << QString::number(qintptr(overlapped), 16);
-    qDebug() << "FileEngineWin::readCallback" << "numberOfBytesTransfered = " << numberOfBytesTransfered;
+//    qDebug() << "FileEngineWin::readCallback" << "errorCode =" << errorCode
+//             << "numberOfBytesTransfered = " << numberOfBytesTransfered;
+//    qDebug() << "FileEngineWin::readCallback" << "overlapped" << QString::number(qintptr(overlapped), 16);
+
     MyOverlapped *myOverlapped = static_cast<MyOverlapped *>(overlapped);
     FileEngineWin *engine = myOverlapped->engine;
     engine->reading = false;
+    if (myOverlapped->canceled || errorCode == ERROR_OPERATION_ABORTED) {
+        qDebug() << "FileEngineWin::readCallback" << "operation aborted";
+        return;
+    }
+    if (errorCode != NOERROR) {
+        qDebug() << "FileEngineWin::readCallback" << "errorCode =" << errorCode
+                 << "numberOfBytesTransfered = " << numberOfBytesTransfered;
+            return;
+    }
     engine->pos += numberOfBytesTransfered;
     engine->activeOverlapped.swap(engine->inactiveOverlapped);
     engine->readFinished(engine->readBuffer.data(), numberOfBytesTransfered);

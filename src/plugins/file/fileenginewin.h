@@ -35,8 +35,8 @@ private:
             Q_ASSERT(qintptr(static_cast<LPOVERLAPPED>(this)) == qintptr(this));
             memset(this, 0, sizeof(MyOverlapped));
             hEvent = CreateEvent(0,TRUE,FALSE,0);
-            qDebug() << "MyOverlapped" << "hEvent =" << QString::number(qintptr(hEvent), 16);
             this->engine = engine;
+            canceled = false;
         }
         ~MyOverlapped()
         {
@@ -44,6 +44,7 @@ private:
         }
 
         FileEngineWin *engine;
+        bool canceled;
     };
 
     QScopedPointer<MyOverlapped> activeOverlapped;
