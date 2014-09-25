@@ -132,9 +132,6 @@ void tst_File::readBench()
     QVERIFY(file.open(QIODevice::ReadOnly));
 
     QByteArray data;
-    QByteArray lowered;
-    QByteArray uppered;
-    QByteArray base64;
 
     QBENCHMARK {
         while (!file.atEnd()) {
@@ -142,9 +139,6 @@ void tst_File::readBench()
             qint64 bytes = file.bytesAvailable();
             const QByteArray data1 = file.read(bytes);
             data.append(data1);
-            lowered.append(data1.toLower());
-            uppered.append(data1.toUpper());
-            base64 = data1.toBase64();
         }
     }
 }
@@ -157,18 +151,12 @@ void tst_File::readQFileBench()
     QVERIFY(file.open(QIODevice::ReadOnly));
 
     QByteArray data;
-    QByteArray lowered;
-    QByteArray uppered;
-    QByteArray base64;
 
     QBENCHMARK {
         while (!file.atEnd()) {
             qint64 bytes = 4096;
             const QByteArray data1 = file.read(bytes);
             data.append(data1);
-            lowered.append(data1.toLower());
-            uppered.append(data1.toUpper());
-            base64 = data1.toBase64();
         }
     }
 }
