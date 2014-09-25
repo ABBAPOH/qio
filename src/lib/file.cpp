@@ -224,25 +224,3 @@ qint64 File::writeData(const char *data, qint64 maxlen)
 {
     return -1;
 }
-
-void File::onOpenFinished()
-{
-    Q_D(File);
-    QFutureWatcher<bool> *watcher = static_cast<QFutureWatcher<bool> *>(sender());
-    bool ok = watcher->future().result();
-    if (ok) {
-        d->state = File::Opened;
-//        size = size;
-        QIODevice::open(d->openMode | QIODevice::Unbuffered);
-//        if (d->openMode & QIODevice::Unbuffered)
-//            d->buffer.reserve(d->chunkSize);
-//        else
-            d->buffer.reserve(d->bufferSize);
-        if (d->openMode & QIODevice::ReadOnly)
-            d->engine->read(d->chunkSize);
-    } else {
-        d->state = File::Closed;
-    }
-    d->openMode = QIODevice::NotOpen;
-    delete watcher;
-}

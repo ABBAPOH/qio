@@ -64,9 +64,6 @@ protected:
     FilePrivate *d_ptr;
 
     friend class AbstractFileEngine;
-
-private slots:
-    void onOpenFinished();
 };
 
 #endif // FILE_H
