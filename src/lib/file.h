@@ -17,7 +17,7 @@ class QIO_EXPORT File : public QIODevice
     Q_PROPERTY(int bufferSize READ bufferSize WRITE setBufferSize NOTIFY bufferSizeChanged)
 
 public:
-    enum State { Closed, Opening, Opened };
+    enum State { Closed, Opening, Opened, Reading };
 
     explicit File(QObject *parent = 0);
     explicit File(const QUrl &url, QObject *parent = 0);

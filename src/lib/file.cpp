@@ -15,6 +15,8 @@ void FilePrivate::init()
     bufferSize = 10*1024*1024; // 10 Mb
     chunkSize = 4*1024; // 4 Kb
     engine = AbstractFileEngine::emptyEngine();
+
+    skipNextRead = false;
 }
 
 void FilePrivate::openFinished(bool ok)
@@ -28,10 +30,8 @@ void FilePrivate::openFinished(bool ok)
             buffer.reserve(chunkSize);
         else
             buffer.reserve(bufferSize);
-        if (openMode & QIODevice::ReadOnly) {
-            qint64 maxlen = qMin<qint64>(chunkSize, q->size());
-            engine->read(maxlen);
-        }
+        if (openMode & QIODevice::ReadOnly)
+            postRead();
     } else {
         state = File::Closed;
     }
@@ -44,15 +44,29 @@ void FilePrivate::readFinished(const char *data, qint64 length)
     if (length <= 0)
         return;
 
-    int oldSize = buffer.size();
-    buffer.resize(oldSize + length);
-    memmove(buffer.data() + oldSize, data, length);
+    state = File::State::Opened;
+    const bool skip = skipNextRead;
+    skipNextRead = false;
+    if (!skip) { // if we had seek, we have to discard read data and read new chunk
+        const int oldSize = buffer.size();
+        buffer.resize(oldSize + length);
+        memmove(buffer.data() + oldSize, data, length);
+    }
+    postRead();
+    if (!skip)
+        emit q->readyRead();
+}
+
+void FilePrivate::postRead()
+{
+    Q_Q(File);
     qint64 maxlen = bufferSize - buffer.size();
     maxlen = qMin<qint64>(maxlen, chunkSize);
     maxlen = qMin(q->size() - (q->pos() + buffer.size()), maxlen);
-    if (maxlen > 0)
+    if (maxlen > 0) {
         engine->read(maxlen);
-    emit q->readyRead();
+        state = File::State::Reading;
+    }
 }
 
 File::File(QObject *parent) :
@@ -87,7 +101,7 @@ bool File::open(QIODevice::OpenMode mode)
     Q_D(File);
     asyncOpen(mode);
     waitForOpened();
-    return d->state == State::Opened;
+    return d->state >= State::Opened;
 }
 
 void File::asyncOpen(QIODevice::OpenMode mode)
@@ -123,8 +137,23 @@ qint64 File::size() const
 bool File::seek(qint64 pos)
 {
     Q_D(File);
-    QIODevice::seek(pos);
-    return d->engine->seek(pos);
+    const qint64 oldPos = this->pos();
+    if (!QIODevice::seek(pos))
+        return false;
+
+    if (!d->engine->seek(pos)) {
+        QIODevice::seek(oldPos);
+        return false;
+    }
+
+    if (d->state == State::Reading) {
+        d->buffer.clear();
+        d->skipNextRead = true;
+    } else {
+        d->postRead();
+    }
+
+    return true;
 }
 
 bool File::atEnd() const

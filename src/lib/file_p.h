@@ -16,6 +16,7 @@ public:
 
     void openFinished(bool ok);
     void readFinished(const char *data, qint64 length);
+    void postRead();
 
     AbstractFileEngine *engine;
     QUrl url;
@@ -26,6 +27,8 @@ public:
     int bufferSize;
     int chunkSize;
     QByteArray buffer;
+
+    bool skipNextRead;
 };
 
 #endif // FILE_P_H

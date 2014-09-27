@@ -26,6 +26,8 @@ private slots:
     void open();
     void read_data();
     void read();
+    void seek_data();
+    void seek();
     void readBench_data();
     void readBench();
     void readQFileBench();
@@ -112,6 +114,49 @@ void tst_File::read()
     }
 
     QVERIFY(qFile.atEnd());
+    qFile.remove();
+}
+
+void tst_File::seek_data()
+{
+    typedef QList<qint64> PosList;
+    QTest::addColumn<QString>("fileName");
+    QTest::addColumn<PosList>("offsets");
+
+    QTest::newRow("1") << QString("small.txt") << (PosList() << 0);
+    QTest::newRow("2") << QString("small.txt") << (PosList() << 100);
+    QTest::newRow("3") << QString("small.txt") << (PosList() << 100 << 200 << 300);
+    QTest::newRow("4") << QString("small.txt") << (PosList() << 300 << 100 << 200);
+    QTest::newRow("5") << QString("small.txt") << (PosList() << 1958); // at end
+    QTest::newRow("6") << QString("small.txt") << (PosList() << 2000); // past end
+    QTest::newRow("7") << QString("small.txt") << (PosList() << 2000 << 0);
+}
+
+void tst_File::seek()
+{
+    QFETCH(QString, fileName);
+    QFETCH(QList<qint64>, offsets);
+    const QString path = dir.path() + "/" + fileName;
+    QVERIFY(copyFile(":/" + fileName, path));
+    QFile qFile(path);
+    File file(QUrl::fromLocalFile(path));
+    QVERIFY(qFile.open(QIODevice::ReadOnly));
+    QVERIFY(file.open(QIODevice::ReadOnly));
+
+    foreach (qint64 offset, offsets) {
+        QCOMPARE(file.seek(offset), qFile.seek(offset));
+        QCOMPARE(file.pos(), qFile.pos());
+        QVERIFY(file.waitForReadyRead());
+        qint64 bytes = file.bytesAvailable();
+        const QByteArray data1 = file.read(bytes);
+        const QByteArray data2 = qFile.read(data1.size());
+        if (data1 != data2) {
+            qDebug() << "data1" << data1.left(100);
+            qDebug() << "data2" << data2.left(100);
+        }
+        QVERIFY(data1 == data2);
+    }
+
     qFile.remove();
 }
 

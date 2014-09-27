@@ -57,8 +57,8 @@ void FileEngineFallback::close()
 
 bool FileEngineFallback::seek(qint64 pos)
 {
-    Q_UNUSED(pos);
-    return false;
+    QMutexLocker l(&data.mutex);
+    return data.file->seek(pos);
 }
 
 qint64 FileEngineFallback::size() const
