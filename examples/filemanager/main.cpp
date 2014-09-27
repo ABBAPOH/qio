@@ -11,16 +11,6 @@
 
 #include "mainwindow.h"
 
-#include <QIO/RunnableThread>
-
-class Run : public Runnable
-{
-public:
-    Run() { qDebug("Run()"); }
-    void run() { qDebug("hello"); }
-    ~Run() { qDebug("~Run()"); }
-};
-
 void testFile()
 {
 //    const char *const filePath = "C:/Users/arch/Programming/asyncfile/freedesktop.org.xml";
@@ -55,12 +45,6 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
 //    testFile();
-
-    RunnableThread t;
-    auto run = new Run;
-    t.start(run);
-    t.start(run);
-    t.start(run);
 
     MainWindow w;
     w.show();

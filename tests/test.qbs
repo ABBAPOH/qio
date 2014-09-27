@@ -1,6 +1,9 @@
 import qbs.base 1.0
 
-DynamicLibrary {
+Product {
+    type: "application"
+    destinationDirectory: project.install_binary_path
+
     Depends { name: "cpp" }
     Depends { name: "Qt.core" }
     Depends { name: "Qt.test" }
