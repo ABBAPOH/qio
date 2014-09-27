@@ -15,7 +15,6 @@ class QIO_EXPORT Runner : public QObject
 public:
     explicit Runner(QObject *parent = 0);
 
-public:
     int expiryTimeout() const;
     void setExpiryTimeout(int arg);
 
