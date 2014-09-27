@@ -146,11 +146,13 @@ bool File::seek(qint64 pos)
         return false;
     }
 
-    if (d->state == State::Reading) {
-        d->buffer.clear();
-        d->skipNextRead = true;
-    } else {
-        d->postRead();
+    if (openMode() & QIODevice::ReadOnly) {
+        if (d->state == State::Reading) {
+            d->buffer.clear();
+            d->skipNextRead = true;
+        } else {
+            d->postRead();
+        }
     }
 
     return true;
@@ -185,6 +187,8 @@ bool File::waitForReadyRead(int msecs)
         return false;
     if (bytesAvailable() > 0)
         return true;
+    if (d->state != Reading)
+        return false;
     return d->engine->waitForReadyRead(msecs);
 }
 

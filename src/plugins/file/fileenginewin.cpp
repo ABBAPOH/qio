@@ -121,6 +121,7 @@ void FileEngineWin::read(qint64 maxlen)
 //                             &dwBytesRead,
                          activeOverlapped.data(),
                          &readCallback);
+    pos += maxlen;
     if (!ok) {
         qWarning() << "ReadFileEx failed" << errorMessage(GetLastError());
 //        setError(QFileDevice::ReadError, errorMessage(GetLastError()) );
@@ -167,8 +168,9 @@ void FileEngineWin::readCallback(DWORD errorCode, DWORD numberOfBytesTransfered,
                  << "numberOfBytesTransfered = " << numberOfBytesTransfered;
             return;
     }
-    engine->pos += numberOfBytesTransfered;
     engine->activeOverlapped.swap(engine->inactiveOverlapped);
+    if (numberOfBytesTransfered != engine->readBuffer.size())
+        numberOfBytesTransfered = 0;
     engine->readFinished(engine->readBuffer.data(), numberOfBytesTransfered);
 }
 
