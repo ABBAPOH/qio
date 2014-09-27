@@ -1,9 +1,7 @@
 #include "direngine.h"
 
 #include <QIO/FileInfoData>
-#include <QIO/RunExtensions>
-
-#include <QtConcurrent/QtConcurrentRun>
+#include <QIO/RunnerHelpers>
 
 #include <QtCore/QDirIterator>
 #include <QtCore/QFileInfo>
@@ -25,8 +23,15 @@ FileInfo fromQFileInfo(const QFileInfo &info)
     return FileInfo(d);
 }
 
-DirEngine::DirEngine()
+DirEngine::DirEngine() :
+    runner(new Runner)
 {
+}
+
+DirEngine::~DirEngine()
+{
+    runner->waitForDone();
+    delete runner;
 }
 
 QFuture<QString> DirEngine::list()
@@ -40,7 +45,7 @@ QFuture<QString> DirEngine::list()
         }
         return;
     };
-    return QtConcurrent::run(f, url().toLocalFile());
+    return RunnerHelpers::run(runner, f, url().toLocalFile());
 }
 
 QFuture<FileInfo> DirEngine::entryList()
@@ -54,7 +59,7 @@ QFuture<FileInfo> DirEngine::entryList()
         }
         return;
     };
-    return QtConcurrent::run(f, url().toLocalFile());
+    return RunnerHelpers::run(runner, f, url().toLocalFile());
 }
 
 QFuture<bool> DirEngine::mkdir(const QString &dirName)
@@ -64,7 +69,7 @@ QFuture<bool> DirEngine::mkdir(const QString &dirName)
         future.reportResult(QDir(path).mkdir(dirName));
     };
 
-    return QtConcurrent::run(f, url().toLocalFile(), dirName);
+    return RunnerHelpers::run(runner, f, url().toLocalFile(), dirName);
 }
 
 QFuture<bool> DirEngine::remove(const QString &fileName)
