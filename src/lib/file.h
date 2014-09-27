@@ -23,20 +23,20 @@ public:
     explicit File(const QUrl &url, QObject *parent = 0);
     ~File();
 
-    bool open(OpenMode mode);
+    bool open(OpenMode mode) Q_DECL_OVERRIDE;
     void asyncOpen(OpenMode mode);
     bool waitForOpened(int msecs = -1);
-    void close();
+    void close() Q_DECL_OVERRIDE;
 
-    qint64 size() const;
-    bool seek(qint64 pos);
+    qint64 size() const Q_DECL_OVERRIDE;
+    bool seek(qint64 pos) Q_DECL_OVERRIDE;
     bool atEnd() const Q_DECL_OVERRIDE;
 
-    qint64 bytesAvailable() const;
-    qint64 bytesToWrite() const;
+    qint64 bytesAvailable() const Q_DECL_OVERRIDE;
+    qint64 bytesToWrite() const Q_DECL_OVERRIDE;
 
-    bool waitForBytesWritten(int msecs = -1);
-    bool waitForReadyRead(int msecs = -1);
+    bool waitForBytesWritten(int msecs = -1) Q_DECL_OVERRIDE;
+    bool waitForReadyRead(int msecs = -1) Q_DECL_OVERRIDE;
 
     QUrl url() const;
 
@@ -58,8 +58,8 @@ signals:
     void bufferSizeChanged(int arg);
 
 protected:
-    qint64 readData(char *data, qint64 maxlen);
-    qint64 writeData(const char *data, qint64 maxlen);
+    qint64 readData(char *data, qint64 maxlen) Q_DECL_OVERRIDE;
+    qint64 writeData(const char *data, qint64 maxlen) Q_DECL_OVERRIDE;
 
     FilePrivate *d_ptr;
 
