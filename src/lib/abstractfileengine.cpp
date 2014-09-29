@@ -46,6 +46,7 @@ public:
     qint64 size() const  Q_DECL_OVERRIDE;
 
     void read(qint64 maxlen) Q_DECL_OVERRIDE;
+    void write(const QByteArray &data) Q_DECL_OVERRIDE;
 
     bool waitForBytesWritten(int msecs = -1) Q_DECL_OVERRIDE;
     bool waitForReadyRead(int msecs = -1) Q_DECL_OVERRIDE;
@@ -83,6 +84,11 @@ void EmptyFileEngine::read(qint64 maxlen)
     Q_UNUSED(maxlen);
 }
 
+void EmptyFileEngine::write(const QByteArray &data)
+{
+    Q_UNUSED(data);
+}
+
 bool EmptyFileEngine::waitForBytesWritten(int msecs)
 {
     Q_UNUSED(msecs);
@@ -112,4 +118,10 @@ void AbstractFileEngine::readFinished(const char *data, qint64 length)
 {
     Q_D(AbstractFileEngine);
     d->file->d_ptr->readFinished(data, length);
+}
+
+void AbstractFileEngine::writeFinished(qint64 length)
+{
+    Q_D(AbstractFileEngine);
+    d->file->d_ptr->writeFinished(length);
 }

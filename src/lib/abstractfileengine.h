@@ -27,6 +27,7 @@ public:
     virtual qint64 size() const = 0;
 
     virtual void read(qint64 maxlen) = 0;
+    virtual void write(const QByteArray &data) = 0;
 
     virtual bool waitForBytesWritten(int msecs = -1) = 0;
     virtual bool waitForReadyRead(int msecs = -1) = 0;
@@ -36,6 +37,7 @@ public:
 protected:
     void openFinished(bool ok);
     void readFinished(const char *data, qint64 length);
+    void writeFinished(qint64 length);
 
 protected:
     AbstractFileEnginePrivate *d_ptr;

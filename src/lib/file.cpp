@@ -57,6 +57,16 @@ void FilePrivate::readFinished(const char *data, qint64 length)
         emit q->readyRead();
 }
 
+void FilePrivate::writeFinished(qint64 length)
+{
+    Q_Q(File);
+    if (!writeBuffer.isEmpty()) // try to write newly came data
+        postWrite();
+    else if (q->openMode() & QIODevice::ReadOnly)
+        postRead();
+    emit q->bytesWritten(length);
+}
+
 void FilePrivate::postRead()
 {
     Q_Q(File);
@@ -67,6 +77,13 @@ void FilePrivate::postRead()
         engine->read(maxlen);
         state = File::State::Reading;
     }
+}
+
+void FilePrivate::postWrite()
+{
+    Q_ASSERT(!writeBuffer.isEmpty());
+    engine->write(writeBuffer);
+    writeBuffer.clear();
 }
 
 File::File(QObject *parent) :
@@ -241,6 +258,7 @@ qint64 File::readData(char *data, qint64 maxlen)
 {
     Q_D(File);
 
+//    qDebug() << this << "readData" << maxlen;
     maxlen = qMin(qint64(d->readBuffer.size()), maxlen);
     if (maxlen == 0)
         return 0;
@@ -255,5 +273,16 @@ qint64 File::readData(char *data, qint64 maxlen)
 
 qint64 File::writeData(const char *data, qint64 maxlen)
 {
-    return -1;
+    Q_D(File);
+    const qint64 availableSize = d->bufferSize - d->writeBuffer.size();
+    maxlen = qMin(maxlen, availableSize);
+    if (maxlen == 0)
+        return 0;
+
+    const int oldSize = d->writeBuffer.size();
+    d->writeBuffer.resize(oldSize + maxlen);
+    memcpy(d->writeBuffer.data() + oldSize, data, maxlen);
+    if (d->state == File::Opened)
+        d->postWrite();
+    return maxlen;
 }

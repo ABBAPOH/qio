@@ -7,12 +7,14 @@
 FileEngineFallback::FileEngineFallback(QObject *parent) :
     AbstractFileEngine(parent),
     openWatcher(new QFutureWatcher<bool>(this)),
-    readWatcher(new QFutureWatcher<QByteArray>(this))
+    readWatcher(new QFutureWatcher<QByteArray>(this)),
+    writeWatcher(new QFutureWatcher<qint64>(this))
 {
     data.file = new QFile();
 
     connect(openWatcher, &QFutureWatcherBase::finished, this, &FileEngineFallback::onOpenFinished);
     connect(readWatcher, &QFutureWatcherBase::finished, this, &FileEngineFallback::onReadFinished);
+    connect(writeWatcher, &QFutureWatcherBase::finished, this, &FileEngineFallback::onWriteFinished);
 }
 
 void FileEngineFallback::setUrl(const QUrl &url)
@@ -83,6 +85,17 @@ void FileEngineFallback::read(qint64 maxlen)
     readWatcher->setFuture(QtConcurrent::run(f, &data, maxlen));
 }
 
+void FileEngineFallback::write(const QByteArray &data)
+{
+    typedef void (*func)(QFutureInterface<qint64> &future, ThreadData *d, QByteArray data);
+    func f = [](QFutureInterface<qint64> &future, ThreadData *d, QByteArray data) {
+        QMutexLocker l(&d->mutex);
+        const qint64 written = d->file->write(data);
+        future.reportResult(written);
+    };
+    writeWatcher->setFuture(QtConcurrent::run(f, &this->data, data));
+}
+
 bool FileEngineFallback::waitForBytesWritten(int msecs)
 {
     Q_UNUSED(msecs);
@@ -116,4 +129,10 @@ void FileEngineFallback::onReadFinished()
     reading = false;
     auto buffer = readWatcher->future().result();
     readFinished(buffer.constData(), buffer.length());
+}
+
+void FileEngineFallback::onWriteFinished()
+{
+    const qint64 written = writeWatcher->future().result();
+    writeFinished(written);
 }

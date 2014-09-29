@@ -23,6 +23,7 @@ public:
     qint64 size() const Q_DECL_OVERRIDE;
 
     void read(qint64 maxlen) Q_DECL_OVERRIDE;
+    void write(const QByteArray &data) Q_DECL_OVERRIDE;
 
     bool waitForBytesWritten(int msecs = -1) Q_DECL_OVERRIDE;
     bool waitForReadyRead(int msecs = -1) Q_DECL_OVERRIDE;
@@ -30,6 +31,7 @@ public:
 private slots:
     void onOpenFinished();
     void onReadFinished();
+    void onWriteFinished();
 
 private:
 
@@ -44,6 +46,7 @@ private:
     mutable QFileInfo fileInfo;
     QFutureWatcher<bool> *openWatcher;
     QFutureWatcher<QByteArray> *readWatcher;
+    QFutureWatcher<qint64> *writeWatcher;
     bool reading {false};
 };
 

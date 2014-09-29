@@ -16,7 +16,9 @@ public:
 
     void openFinished(bool ok);
     void readFinished(const char *data, qint64 length);
+    void writeFinished(qint64 length);
     void postRead();
+    void postWrite();
 
     AbstractFileEngine *engine;
     QUrl url;
@@ -27,6 +29,7 @@ public:
     int bufferSize;
     int chunkSize;
     QByteArray readBuffer;
+    QByteArray writeBuffer;
 
     bool skipNextRead;
 };

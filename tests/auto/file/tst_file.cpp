@@ -28,6 +28,8 @@ private slots:
     void read();
     void seek_data();
     void seek();
+    void write_data();
+    void write();
     void readBench_data();
     void readBench();
     void readQFileBench();
@@ -158,6 +160,58 @@ void tst_File::seek()
     }
 
     qFile.remove();
+}
+
+void tst_File::write_data()
+{
+    QTest::addColumn<QString>("fileName");
+
+    QTest::newRow("1") << QString("small.txt");
+    QTest::newRow("2") << QString("medium.txt");
+    QTest::newRow("3") << QString("freedesktop.org.xml");
+}
+
+void tst_File::write()
+{
+    QFETCH(QString, fileName);
+    const QString path = dir.path() + "/" + fileName;
+    QVERIFY(copyFile(":/" + fileName, path));
+    File file1(QUrl::fromLocalFile(path));
+    File file2(QUrl::fromLocalFile(path + ".out"));
+    QVERIFY(file1.open(QIODevice::ReadOnly));
+    QVERIFY(file2.open(QIODevice::WriteOnly));
+
+    while (!file1.atEnd()) {
+        QVERIFY(file1.waitForReadyRead());
+        const qint64 bytes = file1.bytesAvailable();
+        const QByteArray data = file1.read(bytes);
+        const qint64 written = file2.write(data);
+        QVERIFY(written == bytes);
+        file2.waitForBytesWritten();
+    }
+
+    file1.close();
+    file2.close();
+
+    // compare files
+    {
+        QFile file1(path);
+        QFile file2(path);
+        QVERIFY(file1.open(QIODevice::ReadOnly));
+        QVERIFY(file2.open(QIODevice::ReadOnly));
+
+        while (!file1.atEnd()) {
+            const QByteArray data1 = file1.read(4096);
+            const QByteArray data2 = file2.read(4096);
+            if (data1 != data2) {
+                qDebug() << "data1" << data1.left(100);
+                qDebug() << "data2" << data2.left(100);
+            }
+            QCOMPARE(file1.pos(), file2.pos());
+            QVERIFY(data1 == data2);
+        }
+        QVERIFY(file2.atEnd());
+    }
 }
 
 void tst_File::readBench_data()
