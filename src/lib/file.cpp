@@ -27,9 +27,9 @@ void FilePrivate::openFinished(bool ok)
 //        size = size;
         q->QIODevice::open(openMode);
         if (openMode & QIODevice::Unbuffered)
-            buffer.reserve(chunkSize);
+            readBuffer.reserve(chunkSize);
         else
-            buffer.reserve(bufferSize);
+            readBuffer.reserve(bufferSize);
         if (openMode & QIODevice::ReadOnly)
             postRead();
     } else {
@@ -48,9 +48,9 @@ void FilePrivate::readFinished(const char *data, qint64 length)
     const bool skip = skipNextRead;
     skipNextRead = false;
     if (!skip) { // if we had seek, we have to discard read data and read new chunk
-        const int oldSize = buffer.size();
-        buffer.resize(oldSize + length);
-        memmove(buffer.data() + oldSize, data, length);
+        const int oldSize = readBuffer.size();
+        readBuffer.resize(oldSize + length);
+        memmove(readBuffer.data() + oldSize, data, length);
     }
     postRead();
     if (!skip)
@@ -60,9 +60,9 @@ void FilePrivate::readFinished(const char *data, qint64 length)
 void FilePrivate::postRead()
 {
     Q_Q(File);
-    qint64 maxlen = bufferSize - buffer.size();
+    qint64 maxlen = bufferSize - readBuffer.size();
     maxlen = qMin<qint64>(maxlen, chunkSize);
-    maxlen = qMin(q->size() - (q->pos() + buffer.size()), maxlen);
+    maxlen = qMin(q->size() - (q->pos() + readBuffer.size()), maxlen);
     if (maxlen > 0) {
         engine->read(maxlen);
         state = File::State::Reading;
@@ -148,7 +148,7 @@ bool File::seek(qint64 pos)
 
     if (openMode() & QIODevice::ReadOnly) {
         if (d->state == State::Reading) {
-            d->buffer.clear();
+            d->readBuffer.clear();
             d->skipNextRead = true;
         } else {
             d->postRead();
@@ -166,7 +166,7 @@ bool File::atEnd() const
 qint64 File::bytesAvailable() const
 {
     Q_D(const File);
-    return d->buffer.size();
+    return d->readBuffer.size();
 }
 
 qint64 File::bytesToWrite() const
@@ -241,12 +241,12 @@ qint64 File::readData(char *data, qint64 maxlen)
 {
     Q_D(File);
 
-    maxlen = qMin(qint64(d->buffer.size()), maxlen);
+    maxlen = qMin(qint64(d->readBuffer.size()), maxlen);
     if (maxlen == 0)
         return 0;
 
-    memmove(data, d->buffer.constData(), maxlen);
-    d->buffer = d->buffer.mid(maxlen);
+    memmove(data, d->readBuffer.constData(), maxlen);
+    d->readBuffer = d->readBuffer.mid(maxlen);
 
 //    d->engine->read();
 

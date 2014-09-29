@@ -26,7 +26,7 @@ public:
 
     int bufferSize;
     int chunkSize;
-    QByteArray buffer;
+    QByteArray readBuffer;
 
     bool skipNextRead;
 };
