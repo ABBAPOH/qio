@@ -168,7 +168,8 @@ void tst_File::seek()
         QVERIFY(data1 == data2);
     }
 
-    qFile.remove();
+    file.close();
+    QVERIFY(qFile.remove());
 }
 
 void tst_File::write_data()
