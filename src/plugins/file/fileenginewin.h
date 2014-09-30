@@ -17,12 +17,13 @@ public:
     bool seek(qint64 pos) Q_DECL_OVERRIDE;
     qint64 size() const Q_DECL_OVERRIDE;
     void read(qint64 maxlen) Q_DECL_OVERRIDE;
+    void write(const QByteArray &data) Q_DECL_OVERRIDE;
 
     bool waitForBytesWritten(int msecs) Q_DECL_OVERRIDE;
     bool waitForReadyRead(int msecs) Q_DECL_OVERRIDE;
 
 private:
-    static void readCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED activeOverlapped);
+    static void WINAPI readCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED activeOverlapped);
 
 private slots:
     void onOpenFinished();

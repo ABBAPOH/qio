@@ -129,6 +129,11 @@ void FileEngineWin::read(qint64 maxlen)
     reading = ok;
 }
 
+void FileEngineWin::write(const QByteArray &data)
+{
+//    [FIXME]
+}
+
 bool FileEngineWin::waitForBytesWritten(int msecs)
 {
     return false;
