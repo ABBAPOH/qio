@@ -37,14 +37,25 @@ FileEngineWin::FileEngineWin() :
 void FileEngineWin::open(QIODevice::OpenMode mode)
 {
     typedef void (*func)(OpenFutureInterface &future, const QString path, QIODevice::OpenMode mode);
-    func f = [](OpenFutureInterface &future, const QString path, QIODevice::OpenMode mode) {
-        HANDLE fileHandle = CreateFile(reinterpret_cast<const wchar_t *>(path.data()), // file to open
-                                       GENERIC_READ,           // open for reading
-                                       FILE_SHARE_READ | FILE_SHARE_DELETE,        // share for reading
-                                       NULL,                   // default security
-                                       OPEN_EXISTING,          // existing file only
-                                       FILE_FLAG_OVERLAPPED,   // overlapped operation
-                                       NULL);                  // no attr. template
+    func f = [](OpenFutureInterface &future, const QString path, QIODevice::OpenMode openMode) {
+        const DWORD shareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+
+        DWORD accessRights = 0;
+        if (openMode & QIODevice::ReadOnly)
+            accessRights |= GENERIC_READ;
+        if (openMode & QIODevice::WriteOnly)
+            accessRights |= GENERIC_WRITE;
+
+        const DWORD creationDisposition = (openMode & QIODevice::WriteOnly)
+                ? OPEN_ALWAYS
+                : OPEN_EXISTING;
+        HANDLE fileHandle = CreateFile(reinterpret_cast<const wchar_t *>(path.data()),
+                                       accessRights,
+                                       shareMode,
+                                       NULL,
+                                       creationDisposition,
+                                       FILE_FLAG_OVERLAPPED,
+                                       NULL);
 
         if (fileHandle == INVALID_HANDLE_VALUE) {
             qWarning() << "failed to open file" << GetLastError();
