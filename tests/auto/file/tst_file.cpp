@@ -7,12 +7,20 @@
 
 static bool copyFile(const QString &from, const QString &to)
 {
-    bool ok = QFile::copy(from, to);
-    if (ok) {
-        QFile file(to);
-        ok = file.setPermissions(file.permissions() | QFileDevice::WriteOwner);
+    QFile file(from);
+    bool ok = file.copy(to);
+    if (!ok) {
+        qWarning() << "Can't copy file:" << file.errorString();
+        return false;
     }
-    return ok;
+    file.setFileName(to);
+    ok = file.setPermissions(file.permissions() | QFileDevice::WriteOwner);
+    if (!ok) {
+        qWarning() << "Can't set permissions:" << file.errorString();
+        return false;
+    }
+
+    return true;
 }
 
 class tst_File : public QObject
@@ -116,7 +124,8 @@ void tst_File::read()
     }
 
     QVERIFY(qFile.atEnd());
-    qFile.remove();
+    file.close();
+    QVERIFY(qFile.remove());
 }
 
 void tst_File::seek_data()

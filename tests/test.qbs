@@ -31,6 +31,6 @@ Product {
     Group {
         fileTagsFilter: product.type
         qbs.install: true
-        qbs.installDir: project.install_plugin_path
+        qbs.installDir: project.install_binary_path
     }
 }
