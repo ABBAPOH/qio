@@ -142,12 +142,39 @@ void FileEngineWin::read(qint64 maxlen)
 
 void FileEngineWin::write(const QByteArray &data)
 {
-//    [FIXME]
+    Q_ASSERT(m_FileHandle != INVALID_HANDLE_VALUE);
+    if (m_FileHandle == INVALID_HANDLE_VALUE)
+        return;
+
+    qDebug() << "FileEngineWin::write" << "length =" << data.size();
+
+    writeBuffer = data;
+    activeOverlapped->Offset = pos;
+    activeOverlapped->canceled = false;
+
+    bool ok = WriteFileEx(m_FileHandle,
+                          writeBuffer.data(),
+                          writeBuffer.size(),
+                          activeOverlapped.data(),
+                          &writeCallback);
+    if (!ok)
+        qWarning() << "WriteFileEx failed" << errorMessage(GetLastError());
 }
 
 bool FileEngineWin::waitForBytesWritten(int msecs)
 {
-    return false;
+    DWORD result = WaitForSingleObjectEx(activeOverlapped->hEvent, msecs, true);
+//    qDebug() << "waitForReadyRead finished" << errorMessage(dwWaitOvpOprn);
+    switch (result) {
+    case WAIT_FAILED:
+        return false;
+    case WAIT_OBJECT_0:
+        return true;
+    case WAIT_TIMEOUT:
+        return false;
+    }
+
+    return true;
 }
 
 bool FileEngineWin::waitForReadyRead(int msecs)
@@ -188,6 +215,18 @@ void FileEngineWin::readCallback(DWORD errorCode, DWORD numberOfBytesTransfered,
     if (numberOfBytesTransfered != engine->readBuffer.size())
         numberOfBytesTransfered = 0;
     engine->readFinished(engine->readBuffer.data(), numberOfBytesTransfered);
+}
+
+void FileEngineWin::writeCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED overlapped)
+{
+    qDebug() << "FileEngineWin::writeCallback" << "errorCode =" << errorCode
+             << "numberOfBytesTransfered = " << numberOfBytesTransfered;
+
+    MyOverlapped *myOverlapped = static_cast<MyOverlapped *>(overlapped);
+    FileEngineWin *engine = myOverlapped->engine;
+    engine->writeBuffer.clear();
+    engine->activeOverlapped.swap(engine->inactiveOverlapped);
+    engine->writeFinished(numberOfBytesTransfered);
 }
 
 void FileEngineWin::onOpenFinished()

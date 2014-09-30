@@ -24,6 +24,7 @@ public:
 
 private:
     static void WINAPI readCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED activeOverlapped);
+    static void WINAPI writeCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED overlapped);
 
 private slots:
     void onOpenFinished();
@@ -56,6 +57,7 @@ private:
     QScopedPointer<MyOverlapped> inactiveOverlapped;
 //    char readBuffer[BUFFER_SIZE];
     QByteArray readBuffer;
+    QByteArray writeBuffer;
     qint64 pos;
 };
 
