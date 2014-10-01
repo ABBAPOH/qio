@@ -7,6 +7,7 @@
 
 class FileEngineWin : public AbstractFileEngine
 {
+    Q_OBJECT
 public:
     FileEngineWin();
 
