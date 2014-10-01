@@ -46,13 +46,17 @@ void PluginManager::loadPlugins()
     }
     qDebug() << "loading plugins from" << dir.absolutePath();
     foreach (const QString &fileName, dir.entryList(QDir::Files)) {
+        qDebug() << "loading" << fileName;
         QPluginLoader loader(dir.absoluteFilePath(fileName));
         AbstractFileEnginePlugin *plugin = qobject_cast<AbstractFileEnginePlugin *>(loader.instance());
         if (plugin) {
             foreach (const QString &scheme, plugin->schemes()) {
                 handlers.insert(scheme, plugin);
             }
+        } else {
+            qWarning() << "Failed to load plugin" << fileName << ":" << loader.errorString();
         }
+
     }
     qDebug() << "loaded shemes" << handlers.keys();
 }
