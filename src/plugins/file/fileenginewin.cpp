@@ -161,48 +161,55 @@ void FileEngineWin::write(const QByteArray &data)
         qWarning() << "WriteFileEx failed" << errorMessage(GetLastError());
 }
 
-bool FileEngineWin::waitForBytesWritten(int msecs)
+static bool waitForEvent(HANDLE event, int msecs)
 {
-    DWORD result = WaitForSingleObjectEx(activeOverlapped->hEvent, msecs, true);
-//    qDebug() << "waitForReadyRead finished" << errorMessage(dwWaitOvpOprn);
+    DWORD result = WaitForSingleObjectEx(event, msecs, true);
     switch (result) {
-    case WAIT_FAILED:
-        return false;
     case WAIT_OBJECT_0:
         return true;
+    case WAIT_ABANDONED:
+        qWarning() << "waitForEvent" << "WAIT_ABANDONED";
+        return false;
+    case WAIT_IO_COMPLETION:
+        qWarning() << "waitForEvent" << "WAIT_IO_COMPLETION";
+        return false;
+    case WAIT_FAILED:
+        qWarning() << "waitForEvent" << "WAIT_FAILED :"
+                   << errorMessage(GetLastError());
+        return false;
     case WAIT_TIMEOUT:
         return false;
+    default:
+        break;
     }
+    Q_UNREACHABLE();
 
-    return true;
+    return false;
+}
+
+bool FileEngineWin::waitForBytesWritten(int msecs)
+{
+    qDebug() << "waitForBytesWritten";
+    return waitForEvent(activeOverlapped->hEvent, msecs);
 }
 
 bool FileEngineWin::waitForReadyRead(int msecs)
 {
-    DWORD result = WaitForSingleObjectEx(activeOverlapped->hEvent, msecs, true);
-//    qDebug() << "waitForReadyRead finished" << errorMessage(dwWaitOvpOprn);
-    switch (result) {
-    case WAIT_FAILED:
-        return false;
-    case WAIT_OBJECT_0:
-        return true;
-    case WAIT_TIMEOUT:
-        return false;
-    }
-
-    return true;
+    qDebug() << "waitForReadyRead";
+    return waitForEvent(activeOverlapped->hEvent, msecs);
 }
 
 void FileEngineWin::readCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED overlapped)
 {
-//    qDebug() << "FileEngineWin::readCallback" << "errorCode =" << errorCode
-//             << "numberOfBytesTransfered = " << numberOfBytesTransfered;
-//    qDebug() << "FileEngineWin::readCallback" << "overlapped" << QString::number(qintptr(overlapped), 16);
+    qDebug() << "FileEngineWin::readCallback" << "errorCode =" << errorCode
+             << "numberOfBytesTransfered = " << numberOfBytesTransfered;
+    qDebug() << "FileEngineWin::readCallback" << "overlapped" << QString::number(qintptr(overlapped), 16);
 
     MyOverlapped *myOverlapped = static_cast<MyOverlapped *>(overlapped);
     FileEngineWin *engine = myOverlapped->engine;
     engine->reading = false;
     if (myOverlapped->canceled || errorCode == ERROR_OPERATION_ABORTED) {
+        myOverlapped->canceled = false;
         qDebug() << "FileEngineWin::readCallback" << "operation aborted";
         return;
     }
@@ -215,6 +222,7 @@ void FileEngineWin::readCallback(DWORD errorCode, DWORD numberOfBytesTransfered,
     if (numberOfBytesTransfered != engine->readBuffer.size())
         numberOfBytesTransfered = 0;
     engine->readFinished(engine->readBuffer.data(), numberOfBytesTransfered);
+    qDebug() << "readCallback finished";
 }
 
 void FileEngineWin::writeCallback(DWORD errorCode, DWORD numberOfBytesTransfered, LPOVERLAPPED overlapped)

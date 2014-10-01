@@ -41,7 +41,7 @@ private:
         {
             Q_ASSERT(qintptr(static_cast<LPOVERLAPPED>(this)) == qintptr(this));
             memset(this, 0, sizeof(MyOverlapped));
-            hEvent = CreateEvent(0,TRUE,FALSE,0);
+            hEvent = CreateEvent(Q_NULLPTR, true, false, Q_NULLPTR);
             this->engine = engine;
             canceled = false;
         }
