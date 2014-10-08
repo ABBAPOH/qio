@@ -3,6 +3,7 @@
 
 #include "fileinfo.h"
 
+#include <QtCore/QDir>
 #include <QtCore/QFuture>
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QUrl>
@@ -18,12 +19,14 @@ public:
     Dir &operator=(const Dir &);
     ~Dir();
 
-    QFuture<QString> list();
-    QFuture<FileInfo> entryList();
+    QFuture<QString> list(QDir::Filters filters = QDir::NoFilter);
+    QFuture<FileInfo> entryList(QDir::Filters filters = QDir::NoFilter);
     QFuture<bool> mkdir(const QString &fileName);
     QFuture<bool> remove(const QString &fileName);
     QFuture<FileInfo> stat();
     QFuture<FileInfo> stat(const QString &fileName);
+
+    static QFuture<bool> removeRecursively(const QUrl &url);
 
 private:
     QSharedDataPointer<DirData> d;

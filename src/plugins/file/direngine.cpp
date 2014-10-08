@@ -29,32 +29,40 @@ DirEngine::DirEngine()
 {
 }
 
-QFuture<QString> DirEngine::list()
+QFuture<QString> DirEngine::list(QDir::Filters filters)
 {
-    typedef void (*func)(QFutureInterface<QString> &future, QString path);
-    func f = [](QFutureInterface<QString> &future, QString path) {
-        QDirIterator it(path, QDir::NoDotAndDotDot | QDir::AllEntries);
+    typedef void (*func)(QFutureInterface<QString> &future,
+                         QString path,
+                         QDir::Filters filters);
+    func f = [](QFutureInterface<QString> &future,
+            QString path,
+            QDir::Filters filters) {
+        QDirIterator it(path, filters);
         while (it.hasNext()) {
             it.next();
             future.reportResult(it.fileName());
         }
         return;
     };
-    return QtConcurrent::run(f, url().toLocalFile());
+    return QtConcurrent::run(f, url().toLocalFile(), filters);
 }
 
-QFuture<FileInfo> DirEngine::entryList()
+QFuture<FileInfo> DirEngine::entryList(QDir::Filters filters)
 {
-    typedef void (*func)(QFutureInterface<FileInfo> &future, QString path);
-    func f = [](QFutureInterface<FileInfo> &future, QString path) {
-        QDirIterator it(path, QDir::NoDotAndDotDot | QDir::AllEntries);
+    typedef void (*func)(QFutureInterface<FileInfo> &future,
+                         QString path,
+                         QDir::Filters filters);
+    func f = [](QFutureInterface<FileInfo> &future,
+            QString path,
+            QDir::Filters filters) {
+        QDirIterator it(path, filters);
         while (it.hasNext()) {
             it.next();
             future.reportResult(fromQFileInfo(it.fileInfo()));
         }
         return;
     };
-    return QtConcurrent::run(f, url().toLocalFile());
+    return QtConcurrent::run(f, url().toLocalFile(), filters);
 }
 
 QFuture<bool> DirEngine::mkdir(const QString &dirName)

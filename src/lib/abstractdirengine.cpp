@@ -23,21 +23,23 @@ class EmptyDirEngine : public AbstractDirEngine
 public:
     inline EmptyDirEngine() {}
 
-    QFuture<QString> list() Q_DECL_OVERRIDE;
-    QFuture<FileInfo> entryList() Q_DECL_OVERRIDE;
+    QFuture<QString> list(QDir::Filters filters) Q_DECL_OVERRIDE;
+    QFuture<FileInfo> entryList(QDir::Filters filters) Q_DECL_OVERRIDE;
     QFuture<bool> mkdir(const QString &fileName) Q_DECL_OVERRIDE;
     // TODO: separate rmdir?
     QFuture<bool> remove(const QString &fileName) Q_DECL_OVERRIDE;
     QFuture<FileInfo> stat(const QString &fileName) Q_DECL_OVERRIDE;
 };
 
-QFuture<QString> EmptyDirEngine::list()
+QFuture<QString> EmptyDirEngine::list(QDir::Filters filters)
 {
+    Q_UNUSED(filters);
     return QFuture<QString>();
 }
 
-QFuture<FileInfo> EmptyDirEngine::entryList()
+QFuture<FileInfo> EmptyDirEngine::entryList(QDir::Filters filters)
 {
+    Q_UNUSED(filters);
     return QFuture<FileInfo>();
 }
 

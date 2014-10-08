@@ -184,7 +184,7 @@ void FileSystemModel::refresh(const QModelIndex &index)
     connect(watcher, &QFutureWatcherBase::finished, this, &FileSystemModel::onFinished);
 
     Dir dir(url);
-    watcher->setFuture(dir.entryList());
+    watcher->setFuture(dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries));
     item->state = FileSystemModelPrivate::TreeItem::PopulatingState;
 }
 

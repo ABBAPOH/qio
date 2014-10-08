@@ -3,6 +3,7 @@
 
 #include "fileinfo.h"
 
+#include <QtCore/QDir>
 #include <QtCore/QFuture>
 #include <QtCore/QUrl>
 
@@ -15,8 +16,8 @@ public:
     QUrl url() const;
     virtual void setUrl(const QUrl &url);
 
-    virtual QFuture<QString> list() = 0;
-    virtual QFuture<FileInfo> entryList() = 0;
+    virtual QFuture<QString> list(QDir::Filters filters) = 0;
+    virtual QFuture<FileInfo> entryList(QDir::Filters filters) = 0;
     virtual QFuture<bool> mkdir(const QString &fileName) = 0;
     // TODO: separate rmdir?
     virtual QFuture<bool> remove(const QString &fileName) = 0;

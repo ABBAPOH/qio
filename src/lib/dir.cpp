@@ -2,6 +2,7 @@
 #include "dir_p.h"
 
 #include "pluginmanager_p.h"
+#include "runextensions.h"
 
 Dir::Dir() :
     d(new DirData)
@@ -35,14 +36,14 @@ Dir::~Dir()
 {
 }
 
-QFuture<QString> Dir::list()
+QFuture<QString> Dir::list(QDir::Filters filters)
 {
-    return d->engine->list();
+    return d->engine->list(filters);
 }
 
-QFuture<FileInfo> Dir::entryList()
+QFuture<FileInfo> Dir::entryList(QDir::Filters filters)
 {
-    return d->engine->entryList();
+    return d->engine->entryList(filters);
 }
 
 QFuture<bool> Dir::mkdir(const QString &fileName)
@@ -63,4 +64,33 @@ QFuture<FileInfo> Dir::stat()
 QFuture<FileInfo> Dir::stat(const QString &fileName)
 {
     return d->engine->stat(fileName);
+}
+
+static bool doRemove(const QUrl &url)
+{
+    Dir dir(url);
+    const auto filters = QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden | QDir::System;
+    auto f1 = dir.entryList(filters);
+    // TODO: wait for next result
+    f1.waitForFinished();
+    for (int i = 0; i < f1.resultCount(); ++i) {
+        const FileInfo info = f1.resultAt(i);
+
+        if (info.isDir())
+            doRemove(info.url());
+
+        auto f2 = dir.remove(info.fileName());
+        f2.waitForFinished();
+    }
+    return true;
+}
+
+QFuture<bool> Dir::removeRecursively(const QUrl &url)
+{
+    typedef void (*func)(QFutureInterface<bool> &future, QUrl url);
+    func f = [](QFutureInterface<bool> &future, QUrl url) {
+        bool ok = doRemove(url);
+        future.reportResult(ok);
+    };
+    return QtConcurrent::run(f, url);
 }
