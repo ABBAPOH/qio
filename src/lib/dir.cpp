@@ -67,6 +67,14 @@ QFuture<FileInfo> Dir::stat(const QString &fileName)
     return d->engine->stat(fileName);
 }
 
+QFuture<bool> Dir::touch(const QString &fileName)
+{
+    QUrl url = d->url;
+    const QFileInfo info(url.path());
+    url.setPath(info.absoluteFilePath() + "/" + fileName);
+    return touch(url);
+}
+
 QFuture<bool> Dir::touch(const QUrl &url)
 {
     typedef void (*func)(QFutureInterface<bool> &future, QUrl url);
