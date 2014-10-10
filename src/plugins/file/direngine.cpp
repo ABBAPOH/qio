@@ -97,6 +97,10 @@ QFuture<bool> DirEngine::remove(const QString &fileName)
 
 QFuture<FileInfo> DirEngine::stat(const QString &fileName)
 {
-    Q_UNUSED(fileName);
-    return QFuture<FileInfo>();
+    typedef void (*func)(QFutureInterface<FileInfo> &future, QString path, QString fileName);
+    func f = [](QFutureInterface<FileInfo> &future, QString path, QString fileName) {
+        future.reportResult(fromQFileInfo(QFileInfo(QDir(path).absoluteFilePath(fileName))));
+    };
+
+    return QtConcurrent::run(f, url().toLocalFile(), fileName);
 }

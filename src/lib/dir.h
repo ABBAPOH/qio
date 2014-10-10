@@ -23,9 +23,14 @@ public:
     QFuture<FileInfo> entryList(QDir::Filters filters = QDir::NoFilter);
     QFuture<bool> mkdir(const QString &fileName);
     QFuture<bool> rmdir(const QString &fileName);
+    QFuture<bool> rmdir(const QUrl &url);
+
     QFuture<bool> remove(const QString &fileName);
+    static QFuture<bool> remove(const QUrl &url);
+
     QFuture<FileInfo> stat();
     QFuture<FileInfo> stat(const QString &fileName);
+    static QFuture<FileInfo> stat(const QUrl &url);
 
     QFuture<bool> touch(const QString &fileName);
     static QFuture<bool> touch(const QUrl &url);

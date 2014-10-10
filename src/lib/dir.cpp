@@ -5,6 +5,21 @@
 #include "pluginmanager_p.h"
 #include "runextensions.h"
 
+static inline QString getAbsolutePath(const QUrl &url)
+{
+    return QFileInfo(url.path()).absolutePath();
+}
+
+static inline QUrl getAbsoluteUrl(const QUrl &url)
+{
+    return QUrl::fromLocalFile(getAbsolutePath(url));
+}
+
+static inline QString getFileName(const QUrl &url)
+{
+    return QFileInfo(url.path()).fileName();
+}
+
 Dir::Dir() :
     d(new DirData)
 {
@@ -57,9 +72,19 @@ QFuture<bool> Dir::rmdir(const QString &fileName)
     return d->engine->rmdir(fileName);
 }
 
+QFuture<bool> Dir::rmdir(const QUrl &url)
+{
+    return Dir(getAbsoluteUrl(url)).rmdir(getFileName(url));
+}
+
 QFuture<bool> Dir::remove(const QString &fileName)
 {
     return d->engine->remove(fileName);
+}
+
+QFuture<bool> Dir::remove(const QUrl &url)
+{
+    return Dir(getAbsoluteUrl(url)).remove(getFileName(url));
 }
 
 QFuture<FileInfo> Dir::stat()
@@ -70,6 +95,11 @@ QFuture<FileInfo> Dir::stat()
 QFuture<FileInfo> Dir::stat(const QString &fileName)
 {
     return d->engine->stat(fileName);
+}
+
+QFuture<FileInfo> Dir::stat(const QUrl &url)
+{
+    return Dir(getAbsoluteUrl(url)).stat(getFileName(url));
 }
 
 QFuture<bool> Dir::touch(const QString &fileName)
@@ -91,30 +121,42 @@ QFuture<bool> Dir::touch(const QUrl &url)
     return QtConcurrent::run(f, url);
 }
 
-static bool doRemove(const QUrl &url)
+static bool doRemove(const FileInfo &info)
 {
-    Dir dir(url);
-    const auto filters = QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden | QDir::System;
-    auto f1 = dir.entryList(filters);
-    // TODO: wait for next result
-    f1.waitForFinished();
-    for (int i = 0; i < f1.resultCount(); ++i) {
-        const FileInfo info = f1.resultAt(i);
+    if (info.isDir()) {
+        static const auto filters = QDir::NoDotAndDotDot
+                | QDir::AllEntries
+                | QDir::Hidden
+                | QDir::System;
+        const QUrl url = info.url();
+        Dir dir(url);
+        auto f1 = dir.entryList(filters);
+        // TODO: wait for next result
+        f1.waitForFinished();
+        bool ok = true;
+        for (int i = 0; i < f1.resultCount(); ++i)
+            ok &= doRemove(f1.resultAt(i));
 
-        if (info.isDir())
-            doRemove(info.url());
+        if (!ok)
+            return false;
 
-        auto f2 = dir.remove(info.fileName());
-        f2.waitForFinished();
+        auto f = dir.rmdir(url);
+        f.waitForFinished();
+        return f.result();
     }
-    return true;
+
+    auto f = Dir::remove(info.url());
+    f.waitForFinished();
+    return f.result();
 }
 
 QFuture<bool> Dir::removeRecursively(const QUrl &url)
 {
     typedef void (*func)(QFutureInterface<bool> &future, QUrl url);
     func f = [](QFutureInterface<bool> &future, QUrl url) {
-        bool ok = doRemove(url);
+        auto f2 = Dir::stat(url);
+        f2.waitForFinished();
+        bool ok = doRemove(f2.result());
         future.reportResult(ok);
     };
     return QtConcurrent::run(f, url);
