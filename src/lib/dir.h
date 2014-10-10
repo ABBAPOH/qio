@@ -26,6 +26,7 @@ public:
     QFuture<FileInfo> stat();
     QFuture<FileInfo> stat(const QString &fileName);
 
+    static QFuture<bool> touch(const QUrl &url);
     static QFuture<bool> removeRecursively(const QUrl &url);
 
 private:

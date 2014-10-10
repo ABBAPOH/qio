@@ -1,6 +1,7 @@
 #include "dir.h"
 #include "dir_p.h"
 
+#include "file.h"
 #include "pluginmanager_p.h"
 #include "runextensions.h"
 
@@ -64,6 +65,17 @@ QFuture<FileInfo> Dir::stat()
 QFuture<FileInfo> Dir::stat(const QString &fileName)
 {
     return d->engine->stat(fileName);
+}
+
+QFuture<bool> Dir::touch(const QUrl &url)
+{
+    typedef void (*func)(QFutureInterface<bool> &future, QUrl url);
+    func f = [](QFutureInterface<bool> &future, QUrl url) {
+        File file(url);
+        const bool ok = file.open(QIODevice::WriteOnly);
+        future.reportResult(ok);
+    };
+    return QtConcurrent::run(f, url);
 }
 
 static bool doRemove(const QUrl &url)
