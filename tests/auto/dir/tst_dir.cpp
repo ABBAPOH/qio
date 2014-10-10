@@ -11,6 +11,7 @@ public:
 private slots:
     void initTestCase();
     void mkdir();
+    void rmdir();
     void touch();
 
 private:
@@ -29,15 +30,30 @@ void tst_Dir::initTestCase()
 
 void tst_Dir::mkdir()
 {
-    const QString path = dir.path() + "/" + "folder";
+    const QString folderName = "folder_mkdir";
+    const QString path = dir.path() + "/" + folderName;
 
     QVERIFY(!QFileInfo(path).exists());
     Dir d(dirUrl);
-    auto future = d.mkdir("folder");
+    auto future = d.mkdir(folderName);
     future.waitForFinished();
     QVERIFY(QFileInfo(path).exists());
     QVERIFY(QFileInfo(path).isDir());
     QVERIFY(!QFileInfo(path).isFile());
+}
+
+void tst_Dir::rmdir()
+{
+    const QString folderName = "folder_rmdir";
+    const QString path = dir.path() + "/" + folderName;
+
+    QVERIFY(!QFileInfo(path).exists());
+    Dir d(dirUrl);
+    auto future = d.mkdir(folderName);
+    future.waitForFinished();
+    future = d.rmdir(folderName);
+    future.waitForFinished();
+    QVERIFY(!QFileInfo(path).exists());
 }
 
 void tst_Dir::touch()

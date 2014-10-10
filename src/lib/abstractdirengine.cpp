@@ -26,7 +26,7 @@ public:
     QFuture<QString> list(QDir::Filters filters) Q_DECL_OVERRIDE;
     QFuture<FileInfo> entryList(QDir::Filters filters) Q_DECL_OVERRIDE;
     QFuture<bool> mkdir(const QString &fileName) Q_DECL_OVERRIDE;
-    // TODO: separate rmdir?
+    QFuture<bool> rmdir(const QString &fileName) Q_DECL_OVERRIDE;
     QFuture<bool> remove(const QString &fileName) Q_DECL_OVERRIDE;
     QFuture<FileInfo> stat(const QString &fileName) Q_DECL_OVERRIDE;
 };
@@ -44,6 +44,12 @@ QFuture<FileInfo> EmptyDirEngine::entryList(QDir::Filters filters)
 }
 
 QFuture<bool> EmptyDirEngine::mkdir(const QString &fileName)
+{
+    Q_UNUSED(fileName);
+    return QFuture<bool>();
+}
+
+QFuture<bool> EmptyDirEngine::rmdir(const QString &fileName)
 {
     Q_UNUSED(fileName);
     return QFuture<bool>();

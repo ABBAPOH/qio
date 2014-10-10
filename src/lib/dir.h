@@ -22,6 +22,7 @@ public:
     QFuture<QString> list(QDir::Filters filters = QDir::NoFilter);
     QFuture<FileInfo> entryList(QDir::Filters filters = QDir::NoFilter);
     QFuture<bool> mkdir(const QString &fileName);
+    QFuture<bool> rmdir(const QString &fileName);
     QFuture<bool> remove(const QString &fileName);
     QFuture<FileInfo> stat();
     QFuture<FileInfo> stat(const QString &fileName);

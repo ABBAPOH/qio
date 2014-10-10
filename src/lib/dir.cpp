@@ -52,6 +52,11 @@ QFuture<bool> Dir::mkdir(const QString &fileName)
     return d->engine->mkdir(fileName);
 }
 
+QFuture<bool> Dir::rmdir(const QString &fileName)
+{
+    return d->engine->rmdir(fileName);
+}
+
 QFuture<bool> Dir::remove(const QString &fileName)
 {
     return d->engine->remove(fileName);
