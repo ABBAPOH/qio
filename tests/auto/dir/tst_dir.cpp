@@ -13,6 +13,7 @@ private slots:
     void mkdir();
     void rmdir();
     void touch();
+    void remove();
 
 private:
     QTemporaryDir dir;
@@ -58,15 +59,30 @@ void tst_Dir::rmdir()
 
 void tst_Dir::touch()
 {
-    const QString path = dir.path() + "/" + "file";
+    const QString fileName = "file_touch";
+    const QString path = dir.path() + "/" + fileName;
 
     QVERIFY(!QFileInfo(path).exists());
     Dir d(dirUrl);
-    auto future = d.touch("file");
+    auto future = d.touch(fileName);
     future.waitForFinished();
     QVERIFY(QFileInfo(path).exists());
     QVERIFY(!QFileInfo(path).isDir());
     QVERIFY(QFileInfo(path).isFile());
+}
+
+void tst_Dir::remove()
+{
+    const QString fileName = "file_remove";
+    const QString path = dir.path() + "/" + fileName;
+
+    QVERIFY(!QFileInfo(path).exists());
+    Dir d(dirUrl);
+    auto future = d.touch(fileName);
+    future.waitForFinished();
+    future = d.remove(fileName);
+    future.waitForFinished();
+    QVERIFY(!QFileInfo(path).exists());
 }
 
 QTEST_MAIN(tst_Dir)

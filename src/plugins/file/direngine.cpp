@@ -87,8 +87,12 @@ QFuture<bool> DirEngine::rmdir(const QString &dirName)
 
 QFuture<bool> DirEngine::remove(const QString &fileName)
 {
-    Q_UNUSED(fileName);
-    return QFuture<bool>();
+    typedef void (*func)(QFutureInterface<bool> &future, QString path, QString fileName);
+    func f = [](QFutureInterface<bool> &future, QString path, QString fileName) {
+        future.reportResult(QDir(path).remove(fileName));
+    };
+
+    return QtConcurrent::run(f, url().toLocalFile(), fileName);
 }
 
 QFuture<FileInfo> DirEngine::stat(const QString &fileName)
