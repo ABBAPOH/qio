@@ -20,6 +20,7 @@ public:
     ~Dir();
 
     QUrl url() const;
+    void setUrl(const QUrl &url);
 
     QFuture<QString> list(QDir::Filters filters = QDir::NoFilter);
     QFuture<FileInfo> entryList(QDir::Filters filters = QDir::NoFilter);

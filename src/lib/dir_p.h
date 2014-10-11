@@ -13,6 +13,9 @@ class DirData : public QSharedData
 public:
     QUrl url;
     AbstractDirEngine *engine;
+
+    static AbstractDirEngine *createEngine(const QUrl &url);
+    static void destroyEngine(AbstractDirEngine *engine);
 };
 
 #endif // DIR_P_H

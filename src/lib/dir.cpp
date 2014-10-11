@@ -5,6 +5,20 @@
 #include "pluginmanager_p.h"
 #include "runextensions.h"
 
+AbstractDirEngine *DirData::createEngine(const QUrl &url)
+{
+    AbstractDirEngine *engine = PluginManager::createDirEngine(url);
+    if (!engine)
+        engine = AbstractDirEngine::emptyEngine();
+    return engine;
+}
+
+void DirData::destroyEngine(AbstractDirEngine *engine)
+{
+    if (engine != AbstractDirEngine::emptyEngine())
+        delete engine;
+}
+
 static inline QString getAbsolutePath(const QUrl &url)
 {
     return QFileInfo(url.path()).absolutePath();
@@ -30,10 +44,7 @@ Dir::Dir(const QUrl &url) :
     d(new DirData)
 {
     d->url = url;
-    d->engine = PluginManager::createDirEngine(url);
-    if (!d->engine) {
-        d->engine = AbstractDirEngine::emptyEngine();
-    }
+    d->engine = DirData::createEngine(url);
 }
 
 Dir::Dir(const Dir &rhs) :
@@ -55,6 +66,18 @@ Dir::~Dir()
 QUrl Dir::url() const
 {
     return d->url;
+}
+
+void Dir::setUrl(const QUrl &url)
+{
+    if (d->url == url)
+        return;
+
+    if (d->url.scheme() != url.scheme()) {
+        DirData::destroyEngine(d->engine);
+        d->engine = DirData::createEngine(url);
+    }
+    d->url = url;
 }
 
 QFuture<QString> Dir::list(QDir::Filters filters)
