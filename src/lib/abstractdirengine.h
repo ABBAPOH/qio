@@ -18,8 +18,8 @@ public:
 
     virtual QFuture<QString> list(QDir::Filters filters) = 0;
     virtual QFuture<FileInfo> entryList(QDir::Filters filters) = 0;
-    virtual QFuture<bool> mkdir(const QString &fileName) = 0;
-    virtual QFuture<bool> rmdir(const QString &fileName) = 0;
+    virtual QFuture<bool> mkdir(const QString &dirName) = 0;
+    virtual QFuture<bool> rmdir(const QString &dirName) = 0;
     virtual QFuture<bool> remove(const QString &fileName) = 0;
     virtual QFuture<FileInfo> stat(const QString &fileName) = 0;
 
