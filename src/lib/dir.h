@@ -8,8 +8,9 @@
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QUrl>
 
-class DirData;
+class AbstractDirEngine;
 
+class DirData;
 class QIO_EXPORT Dir
 {
 public:
@@ -38,6 +39,9 @@ public:
     QFuture<bool> touch(const QString &fileName);
     static QFuture<bool> touch(const QUrl &url);
     static QFuture<bool> removeRecursively(const QUrl &url);
+
+protected:
+    AbstractDirEngine *engine() const;
 
 private:
     QSharedDataPointer<DirData> d;

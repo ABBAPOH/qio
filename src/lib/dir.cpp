@@ -189,3 +189,8 @@ QFuture<bool> Dir::removeRecursively(const QUrl &url)
     };
     return QtConcurrent::run(f, url);
 }
+
+AbstractDirEngine *Dir::engine() const
+{
+    return d->engine;
+}
