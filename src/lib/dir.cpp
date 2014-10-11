@@ -52,6 +52,11 @@ Dir::~Dir()
 {
 }
 
+QUrl Dir::url() const
+{
+    return d->url;
+}
+
 QFuture<QString> Dir::list(QDir::Filters filters)
 {
     return d->engine->list(filters);

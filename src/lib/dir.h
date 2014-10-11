@@ -19,6 +19,8 @@ public:
     Dir &operator=(const Dir &);
     ~Dir();
 
+    QUrl url() const;
+
     QFuture<QString> list(QDir::Filters filters = QDir::NoFilter);
     QFuture<FileInfo> entryList(QDir::Filters filters = QDir::NoFilter);
     QFuture<bool> mkdir(const QString &fileName);
