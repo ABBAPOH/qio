@@ -61,6 +61,7 @@ Dir &Dir::operator=(const Dir &rhs)
 
 Dir::~Dir()
 {
+    DirData::destroyEngine(d->engine);
 }
 
 QUrl Dir::url() const
