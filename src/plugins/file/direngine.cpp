@@ -9,7 +9,7 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QMimeDatabase>
 
-FileInfo fromQFileInfo(const QFileInfo &info)
+static FileInfo fromQFileInfo(const QFileInfo &info)
 {
     FileInfoData *d = new FileInfoData();
 

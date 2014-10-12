@@ -11,7 +11,9 @@ Plugin {
         "fileenginefallback.cpp",
         "fileenginefallback.h",
         "fileplugin.cpp",
-        "fileplugin.h"
+        "fileplugin.h",
+        "syncdirengine.h",
+        "syncdirengine.cpp"
     ]
 
     Group {
