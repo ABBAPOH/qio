@@ -11,6 +11,12 @@
 class FileEntryData : public QSharedData
 {
 public:
+    FileEntryData();
+    FileEntryData(const FileEntryData &other);
+    ~FileEntryData();
+
+    FileEntryData &operator =(const FileEntryData &other);
+
     QUrl url;
     AbstractDirEngine *engine;
 

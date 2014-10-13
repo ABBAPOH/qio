@@ -5,6 +5,30 @@
 #include "pluginmanager_p.h"
 #include "runextensions.h"
 
+FileEntryData::FileEntryData() :
+    engine(Q_NULLPTR)
+{
+}
+
+FileEntryData::FileEntryData(const FileEntryData &other) :
+    url(other.url),
+    engine(createEngine(other.url))
+{
+}
+
+FileEntryData::~FileEntryData()
+{
+    destroyEngine(engine);
+}
+
+FileEntryData &FileEntryData::operator =(const FileEntryData &other)
+{
+    url = other.url;
+    destroyEngine(engine);
+    engine = createEngine(other.url);
+    return *this;
+}
+
 AbstractDirEngine *FileEntryData::createEngine(const QUrl &url)
 {
     AbstractDirEngine *engine = PluginManager::createDirEngine(url);
@@ -61,7 +85,6 @@ FileEntry &FileEntry::operator=(const FileEntry &rhs)
 
 FileEntry::~FileEntry()
 {
-    FileEntryData::destroyEngine(d->engine);
 }
 
 QUrl FileEntry::url() const
