@@ -28,7 +28,7 @@ QList<FileInfo> SyncDirEngine::entryList(QDir::Filters filters)
 {
     QList<FileInfo> result;
 
-    auto infos = QDir(url().toLocalFile()).entryList(filters);
+    auto infos = QDir(url().toLocalFile()).entryInfoList(filters);
     foreach (const auto &info, infos)
         result.append(fromQFileInfo(info));
     return result;
