@@ -1,5 +1,6 @@
 #include "syncdirengine.h"
 
+#include <QIO/FileEntry>
 #include <QIO/FileInfoData>
 #include <QtCore/QMimeDatabase>
 
@@ -41,16 +42,15 @@ bool SyncDirEngine::mkdir(const QString &dirName)
 
 bool SyncDirEngine::rmdir(const QString &dirName)
 {
-    return QDir(url().toLocalFile()).rmdir(dirName);
+    return QDir().rmdir(FileEntry::absoluteUrl(url(), dirName).toLocalFile());
 }
 
 bool SyncDirEngine::remove(const QString &fileName)
 {
-    return QDir(url().toLocalFile()).remove(fileName);
+    return QDir().remove(FileEntry::absoluteUrl(url(), fileName).toLocalFile());
 }
 
 FileInfo SyncDirEngine::stat(const QString &fileName)
 {
-    const QString path = url().path() + "/" + fileName;
-    return fromQFileInfo(QFileInfo(path));
+    return fromQFileInfo(QFileInfo(FileEntry::absoluteUrl(url(), fileName).toLocalFile()));
 }

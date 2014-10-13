@@ -26,19 +26,11 @@ public:
     QFuture<QString> list(QDir::Filters filters = QDir::NoFilter);
     QFuture<FileInfo> entryList(QDir::Filters filters = QDir::NoFilter);
     QFuture<bool> mkdir(const QString &fileName);
-    QFuture<bool> rmdir(const QString &fileName);
-    QFuture<bool> rmdir(const QUrl &url);
-
-    QFuture<bool> remove(const QString &fileName);
-    static QFuture<bool> remove(const QUrl &url);
-
-    QFuture<FileInfo> stat();
-    QFuture<FileInfo> stat(const QString &fileName);
-    static QFuture<FileInfo> stat(const QUrl &url);
-
-    QFuture<bool> touch(const QString &fileName);
-    static QFuture<bool> touch(const QUrl &url);
-    static QFuture<bool> removeRecursively(const QUrl &url);
+    QFuture<bool> rmdir(const QString &fileName = QString());
+    QFuture<bool> remove(const QString &fileName = QString());
+    QFuture<FileInfo> stat(const QString &fileName = QString());
+    QFuture<bool> touch(const QString &fileName = QString());
+    QFuture<bool> removeRecursively(const QString &fileName = QString());
 
     static QUrl absoluteUrl(const QUrl &parentUrl, const QString &relativePath);
 

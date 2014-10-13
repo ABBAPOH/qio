@@ -100,19 +100,19 @@ static void makeHierarchy(const QString &path, const QString &folderName)
 
     dir.mkdir("subfolder1");
     dir.cd("subfolder1");
-    FileEntry::touch(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file1"));
-    FileEntry::touch(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file2"));
+    FileEntry(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file1")).touch();
+    FileEntry(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file2")).touch();
     dir.cdUp();
 
     dir.mkdir("subfolder2");
     dir.cd("subfolder2");
-    FileEntry::touch(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file1"));
-    FileEntry::touch(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file2"));
+    FileEntry(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file1")).touch();
+    FileEntry(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file2")).touch();
     dir.cdUp();
 
-    FileEntry::touch(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file1"));
-    FileEntry::touch(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file2"));
-    FileEntry::touch(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file3"));
+    FileEntry(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file1")).touch();
+    FileEntry(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file2")).touch();
+    FileEntry(QUrl::fromLocalFile(dir.absolutePath() + "/" + "file3")).touch();
 }
 
 void tst_FileEntry::removeRecursively()
@@ -122,7 +122,7 @@ void tst_FileEntry::removeRecursively()
     QVERIFY(!QFileInfo(path).exists());
     makeHierarchy(dir.path(), "folder_recursively");
     QVERIFY(QFileInfo(path).exists());
-    auto future = FileEntry::removeRecursively(QUrl::fromLocalFile(path));
+    auto future = FileEntry(QUrl::fromLocalFile(path)).removeRecursively();
     future.waitForFinished();
     const bool ok = future.result();
     QVERIFY(ok);

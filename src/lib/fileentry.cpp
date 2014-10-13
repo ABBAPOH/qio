@@ -101,24 +101,9 @@ QFuture<bool> FileEntry::rmdir(const QString &fileName)
     return d->engine->rmdir(fileName);
 }
 
-QFuture<bool> FileEntry::rmdir(const QUrl &url)
-{
-    return FileEntry(getAbsoluteUrl(url)).rmdir(getFileName(url));
-}
-
 QFuture<bool> FileEntry::remove(const QString &fileName)
 {
     return d->engine->remove(fileName);
-}
-
-QFuture<bool> FileEntry::remove(const QUrl &url)
-{
-    return FileEntry(getAbsoluteUrl(url)).remove(getFileName(url));
-}
-
-QFuture<FileInfo> FileEntry::stat()
-{
-    return stat(".");
 }
 
 QFuture<FileInfo> FileEntry::stat(const QString &fileName)
@@ -126,20 +111,7 @@ QFuture<FileInfo> FileEntry::stat(const QString &fileName)
     return d->engine->stat(fileName);
 }
 
-QFuture<FileInfo> FileEntry::stat(const QUrl &url)
-{
-    return FileEntry(getAbsoluteUrl(url)).stat(getFileName(url));
-}
-
 QFuture<bool> FileEntry::touch(const QString &fileName)
-{
-    QUrl url = d->url;
-    const QFileInfo info(url.path());
-    url.setPath(info.absoluteFilePath() + "/" + fileName);
-    return touch(url);
-}
-
-QFuture<bool> FileEntry::touch(const QUrl &url)
 {
     typedef void (*func)(QFutureInterface<bool> &future, QUrl url);
     func f = [](QFutureInterface<bool> &future, QUrl url) {
@@ -147,7 +119,7 @@ QFuture<bool> FileEntry::touch(const QUrl &url)
         const bool ok = file.open(QIODevice::WriteOnly);
         future.reportResult(ok);
     };
-    return QtConcurrent::run(f, url);
+    return QtConcurrent::run(f, absoluteUrl(this->url(), fileName));
 }
 
 static bool doRemove(const FileInfo &info)
@@ -169,26 +141,26 @@ static bool doRemove(const FileInfo &info)
         if (!ok)
             return false;
 
-        auto f = dir.rmdir(url);
+        auto f = dir.rmdir();
         f.waitForFinished();
         return f.result();
     }
 
-    auto f = FileEntry::remove(info.url());
+    auto f = FileEntry(info.url()).remove();
     f.waitForFinished();
     return f.result();
 }
 
-QFuture<bool> FileEntry::removeRecursively(const QUrl &url)
+QFuture<bool> FileEntry::removeRecursively(const QString &fileName)
 {
     typedef void (*func)(QFutureInterface<bool> &future, QUrl url);
     func f = [](QFutureInterface<bool> &future, QUrl url) {
-        auto f2 = FileEntry::stat(url);
+        auto f2 = FileEntry(url).stat();
         f2.waitForFinished();
         bool ok = doRemove(f2.result());
         future.reportResult(ok);
     };
-    return QtConcurrent::run(f, url);
+    return QtConcurrent::run(f, absoluteUrl(url(), fileName));
 }
 
 /*!
