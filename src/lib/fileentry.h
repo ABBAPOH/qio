@@ -1,5 +1,5 @@
-#ifndef DIR_H
-#define DIR_H
+#ifndef FILEENTRY_H
+#define FILEENTRY_H
 
 #include "fileinfo.h"
 
@@ -10,15 +10,15 @@
 
 class AbstractDirEngine;
 
-class DirData;
-class QIO_EXPORT Dir
+class FileEntryData;
+class QIO_EXPORT FileEntry
 {
 public:
-    Dir();
-    Dir(const QUrl &url);
-    Dir(const Dir &);
-    Dir &operator=(const Dir &);
-    ~Dir();
+    FileEntry();
+    FileEntry(const QUrl &url);
+    FileEntry(const FileEntry &);
+    FileEntry &operator=(const FileEntry &);
+    ~FileEntry();
 
     QUrl url() const;
     void setUrl(const QUrl &url);
@@ -44,7 +44,7 @@ protected:
     AbstractDirEngine *engine() const;
 
 private:
-    QSharedDataPointer<DirData> d;
+    QSharedDataPointer<FileEntryData> d;
 };
 
-#endif // DIR_H
+#endif // FILEENTRY_H

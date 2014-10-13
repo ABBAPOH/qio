@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QThread>
-#include <QIO/Dir>
+#include <QIO/FileEntry>
 #include <QIO/File>
 #include <QIO/FileSystemModel>
 

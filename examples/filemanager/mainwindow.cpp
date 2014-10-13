@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QIO/Dir>
+#include <QIO/FileEntry>
 #include <QIO/FileSystemModel>
 
 #include <QtWidgets/QMessageBox>
@@ -42,7 +42,7 @@ void MainWindow::mkdir()
     if (name.isEmpty())
         return;
 
-    Dir dir(m_model->rootUrl());
+    FileEntry dir(m_model->rootUrl());
     auto future = dir.mkdir(name);
     QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>(this);
     connect(watcher, &QFutureWatcherBase::finished, this, &MainWindow::onMkdirFinished);

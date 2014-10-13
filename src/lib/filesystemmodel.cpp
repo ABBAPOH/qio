@@ -1,7 +1,7 @@
 #include "filesystemmodel.h"
 #include "filesystemmodel_p.h"
 
-#include "dir.h"
+#include "fileentry.h"
 
 #include <QtCore/QFutureWatcher>
 
@@ -183,7 +183,7 @@ void FileSystemModel::refresh(const QModelIndex &index)
     watcher->setProperty("url", url);
     connect(watcher, &QFutureWatcherBase::finished, this, &FileSystemModel::onFinished);
 
-    Dir dir(url);
+    FileEntry dir(url);
     watcher->setFuture(dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries));
     item->state = FileSystemModelPrivate::TreeItem::PopulatingState;
 }

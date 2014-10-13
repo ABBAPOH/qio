@@ -4,11 +4,11 @@
 #include "abstractdirengine.h"
 #include "abstractfileengine.h"
 #include "abstractfileengineplugin.h"
-#include "dir.h"
+#include "fileentry.h"
 
 #include <QtCore/QSharedData>
 
-class DirData : public QSharedData
+class FileEntryData : public QSharedData
 {
 public:
     QUrl url;

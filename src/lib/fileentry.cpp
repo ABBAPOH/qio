@@ -1,11 +1,11 @@
-#include "dir.h"
-#include "dir_p.h"
+#include "fileentry.h"
+#include "fileentry_p.h"
 
 #include "file.h"
 #include "pluginmanager_p.h"
 #include "runextensions.h"
 
-AbstractDirEngine *DirData::createEngine(const QUrl &url)
+AbstractDirEngine *FileEntryData::createEngine(const QUrl &url)
 {
     AbstractDirEngine *engine = PluginManager::createDirEngine(url);
     if (!engine)
@@ -13,7 +13,7 @@ AbstractDirEngine *DirData::createEngine(const QUrl &url)
     return engine;
 }
 
-void DirData::destroyEngine(AbstractDirEngine *engine)
+void FileEntryData::destroyEngine(AbstractDirEngine *engine)
 {
     if (engine != AbstractDirEngine::emptyEngine())
         delete engine;
@@ -34,104 +34,104 @@ static inline QString getFileName(const QUrl &url)
     return QFileInfo(url.path()).fileName();
 }
 
-Dir::Dir() :
-    d(new DirData)
+FileEntry::FileEntry() :
+    d(new FileEntryData)
 {
     d->engine = AbstractDirEngine::emptyEngine();
 }
 
-Dir::Dir(const QUrl &url) :
-    d(new DirData)
+FileEntry::FileEntry(const QUrl &url) :
+    d(new FileEntryData)
 {
     d->url = url;
-    d->engine = DirData::createEngine(url);
+    d->engine = FileEntryData::createEngine(url);
 }
 
-Dir::Dir(const Dir &rhs) :
+FileEntry::FileEntry(const FileEntry &rhs) :
     d(rhs.d)
 {
 }
 
-Dir &Dir::operator=(const Dir &rhs)
+FileEntry &FileEntry::operator=(const FileEntry &rhs)
 {
     if (this != &rhs)
         d.operator=(rhs.d);
     return *this;
 }
 
-Dir::~Dir()
+FileEntry::~FileEntry()
 {
-    DirData::destroyEngine(d->engine);
+    FileEntryData::destroyEngine(d->engine);
 }
 
-QUrl Dir::url() const
+QUrl FileEntry::url() const
 {
     return d->url;
 }
 
-void Dir::setUrl(const QUrl &url)
+void FileEntry::setUrl(const QUrl &url)
 {
     if (d->url == url)
         return;
 
     if (d->url.scheme() != url.scheme()) {
-        DirData::destroyEngine(d->engine);
-        d->engine = DirData::createEngine(url);
+        FileEntryData::destroyEngine(d->engine);
+        d->engine = FileEntryData::createEngine(url);
     }
     d->url = url;
 }
 
-QFuture<QString> Dir::list(QDir::Filters filters)
+QFuture<QString> FileEntry::list(QDir::Filters filters)
 {
     return d->engine->list(filters);
 }
 
-QFuture<FileInfo> Dir::entryList(QDir::Filters filters)
+QFuture<FileInfo> FileEntry::entryList(QDir::Filters filters)
 {
     return d->engine->entryList(filters);
 }
 
-QFuture<bool> Dir::mkdir(const QString &fileName)
+QFuture<bool> FileEntry::mkdir(const QString &fileName)
 {
     return d->engine->mkdir(fileName);
 }
 
-QFuture<bool> Dir::rmdir(const QString &fileName)
+QFuture<bool> FileEntry::rmdir(const QString &fileName)
 {
     return d->engine->rmdir(fileName);
 }
 
-QFuture<bool> Dir::rmdir(const QUrl &url)
+QFuture<bool> FileEntry::rmdir(const QUrl &url)
 {
-    return Dir(getAbsoluteUrl(url)).rmdir(getFileName(url));
+    return FileEntry(getAbsoluteUrl(url)).rmdir(getFileName(url));
 }
 
-QFuture<bool> Dir::remove(const QString &fileName)
+QFuture<bool> FileEntry::remove(const QString &fileName)
 {
     return d->engine->remove(fileName);
 }
 
-QFuture<bool> Dir::remove(const QUrl &url)
+QFuture<bool> FileEntry::remove(const QUrl &url)
 {
-    return Dir(getAbsoluteUrl(url)).remove(getFileName(url));
+    return FileEntry(getAbsoluteUrl(url)).remove(getFileName(url));
 }
 
-QFuture<FileInfo> Dir::stat()
+QFuture<FileInfo> FileEntry::stat()
 {
     return stat(".");
 }
 
-QFuture<FileInfo> Dir::stat(const QString &fileName)
+QFuture<FileInfo> FileEntry::stat(const QString &fileName)
 {
     return d->engine->stat(fileName);
 }
 
-QFuture<FileInfo> Dir::stat(const QUrl &url)
+QFuture<FileInfo> FileEntry::stat(const QUrl &url)
 {
-    return Dir(getAbsoluteUrl(url)).stat(getFileName(url));
+    return FileEntry(getAbsoluteUrl(url)).stat(getFileName(url));
 }
 
-QFuture<bool> Dir::touch(const QString &fileName)
+QFuture<bool> FileEntry::touch(const QString &fileName)
 {
     QUrl url = d->url;
     const QFileInfo info(url.path());
@@ -139,7 +139,7 @@ QFuture<bool> Dir::touch(const QString &fileName)
     return touch(url);
 }
 
-QFuture<bool> Dir::touch(const QUrl &url)
+QFuture<bool> FileEntry::touch(const QUrl &url)
 {
     typedef void (*func)(QFutureInterface<bool> &future, QUrl url);
     func f = [](QFutureInterface<bool> &future, QUrl url) {
@@ -158,7 +158,7 @@ static bool doRemove(const FileInfo &info)
                 | QDir::Hidden
                 | QDir::System;
         const QUrl url = info.url();
-        Dir dir(url);
+        FileEntry dir(url);
         auto f1 = dir.entryList(filters);
         // TODO: wait for next result
         f1.waitForFinished();
@@ -174,16 +174,16 @@ static bool doRemove(const FileInfo &info)
         return f.result();
     }
 
-    auto f = Dir::remove(info.url());
+    auto f = FileEntry::remove(info.url());
     f.waitForFinished();
     return f.result();
 }
 
-QFuture<bool> Dir::removeRecursively(const QUrl &url)
+QFuture<bool> FileEntry::removeRecursively(const QUrl &url)
 {
     typedef void (*func)(QFutureInterface<bool> &future, QUrl url);
     func f = [](QFutureInterface<bool> &future, QUrl url) {
-        auto f2 = Dir::stat(url);
+        auto f2 = FileEntry::stat(url);
         f2.waitForFinished();
         bool ok = doRemove(f2.result());
         future.reportResult(ok);
@@ -191,7 +191,7 @@ QFuture<bool> Dir::removeRecursively(const QUrl &url)
     return QtConcurrent::run(f, url);
 }
 
-AbstractDirEngine *Dir::engine() const
+AbstractDirEngine *FileEntry::engine() const
 {
     return d->engine;
 }
