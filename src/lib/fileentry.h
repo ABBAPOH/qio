@@ -40,6 +40,8 @@ public:
     static QFuture<bool> touch(const QUrl &url);
     static QFuture<bool> removeRecursively(const QUrl &url);
 
+    static QUrl absoluteUrl(const QUrl &parentUrl, const QString &relativePath);
+
 protected:
     AbstractDirEngine *engine() const;
 

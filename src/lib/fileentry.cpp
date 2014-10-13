@@ -191,6 +191,19 @@ QFuture<bool> FileEntry::removeRecursively(const QUrl &url)
     return QtConcurrent::run(f, url);
 }
 
+/*!
+    Appends \a relativePath to the \a parentUrl's path and returns new url.
+*/
+QUrl FileEntry::absoluteUrl(const QUrl &parentUrl, const QString &relativePath)
+{
+    if (relativePath.isEmpty())
+        return parentUrl;
+    QUrl result = parentUrl;
+    const QString path = QDir::cleanPath(result.path() + "/" + relativePath);
+    result.setPath(path);
+    return result;
+}
+
 AbstractDirEngine *FileEntry::engine() const
 {
     return d->engine;
