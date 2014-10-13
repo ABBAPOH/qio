@@ -1,10 +1,12 @@
 #include "fileplugin.h"
 
-#include "direngine.h"
+#include "syncdirengine.h"
 #ifdef Q_OS_WIN
 #include "fileenginewin.h"
 #endif
 #include "fileenginefallback.h"
+
+#include <QIO/SyncDirEngineWrapper>
 
 FilePlugin::FilePlugin(QObject *parent) :
     AbstractFileEnginePlugin(parent)
@@ -36,5 +38,5 @@ AbstractDirEngine *FilePlugin::createDirEngine(const QString &scheme) const
     if (scheme != "qrc" && scheme != "file")
         return Q_NULLPTR;
 
-    return new DirEngine;
+    return new SyncDirEngineWrapper(new SyncDirEngine);
 }
