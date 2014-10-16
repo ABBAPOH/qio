@@ -1,5 +1,7 @@
 #include "syncdirenginewrapper.h"
 
+#include "runextensions.h"
+
 struct FileOperation
 {
     FileOperation(SyncDirEngineWrapper::SharedStatePointer state, const QUrl &url, const QString &name = QString()) :
@@ -16,15 +18,8 @@ struct FileOperation
 typedef void (*Handler)(QFutureInterface<bool> &future, FileOperation operation);
 
 SyncDirEngineWrapper::SyncDirEngineWrapper(AbstractSyncDirEngine *engine) :
-    m_state(new SharedState(engine)),
-    m_runner(new Runner)
+    m_state(new SharedState(engine))
 {
-}
-
-SyncDirEngineWrapper::~SyncDirEngineWrapper()
-{
-    m_runner->waitForDone();
-    delete m_runner;
 }
 
 void SyncDirEngineWrapper::setUrl(const QUrl &url)
@@ -44,7 +39,7 @@ QFuture<QString> SyncDirEngineWrapper::list(QDir::Filters filters)
             future.reportResult(fileName);
         }
     };
-    return RunnerHelpers::run(m_runner, f, FileOperation(m_state, url()), filters);
+    return QtConcurrent::run(f, FileOperation(m_state, url()), filters);
 }
 
 QFuture<FileInfo> SyncDirEngineWrapper::entryList(QDir::Filters filters)
@@ -57,7 +52,7 @@ QFuture<FileInfo> SyncDirEngineWrapper::entryList(QDir::Filters filters)
             future.reportResult(fileInfo);
         }
     };
-    return RunnerHelpers::run(m_runner, f, FileOperation(m_state, url()), filters);
+    return QtConcurrent::run(f, FileOperation(m_state, url()), filters);
 }
 
 QFuture<bool> SyncDirEngineWrapper::mkdir(const QString &dirName)
@@ -67,7 +62,7 @@ QFuture<bool> SyncDirEngineWrapper::mkdir(const QString &dirName)
         future.reportResult(op.state->engine->mkdir(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, h, FileOperation(m_state, url(), dirName));
+    return QtConcurrent::run(h, FileOperation(m_state, url(), dirName));
 }
 
 QFuture<bool> SyncDirEngineWrapper::rmdir(const QString &dirName)
@@ -77,7 +72,7 @@ QFuture<bool> SyncDirEngineWrapper::rmdir(const QString &dirName)
         future.reportResult(op.state->engine->rmdir(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, h, FileOperation(m_state, url(), dirName));
+    return QtConcurrent::run(h, FileOperation(m_state, url(), dirName));
 }
 
 QFuture<bool> SyncDirEngineWrapper::remove(const QString &fileName)
@@ -87,7 +82,7 @@ QFuture<bool> SyncDirEngineWrapper::remove(const QString &fileName)
         future.reportResult(op.state->engine->remove(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, h, FileOperation(m_state, url(), fileName));
+    return QtConcurrent::run(h, FileOperation(m_state, url(), fileName));
 }
 
 QFuture<FileInfo> SyncDirEngineWrapper::stat(const QString &fileName)
@@ -98,5 +93,5 @@ QFuture<FileInfo> SyncDirEngineWrapper::stat(const QString &fileName)
         future.reportResult(op.state->engine->stat(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, h, FileOperation(m_state, url(), fileName));
+    return QtConcurrent::run(h, FileOperation(m_state, url(), fileName));
 }

@@ -3,13 +3,11 @@
 
 #include <QIO/AbstractDirEngine>
 #include <QIO/AbstractSyncDirEngine>
-#include <QIO/RunnerHelpers>
 
 class QIO_EXPORT SyncDirEngineWrapper : public AbstractDirEngine
 {
 public:
     explicit SyncDirEngineWrapper(AbstractSyncDirEngine *engine);
-    ~SyncDirEngineWrapper();
 
     void setUrl(const QUrl &url);
 
@@ -31,7 +29,6 @@ private:
     typedef QSharedPointer<SharedState> SharedStatePointer;
 
     SharedStatePointer m_state;
-    Runner *m_runner;
 
     friend struct FileOperation;
 };
