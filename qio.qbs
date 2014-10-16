@@ -24,12 +24,14 @@ Project {
     }
 
     property stringList includePaths: {
-        return [ path + "/include" ]
+        return [ path + "/include", path + "/share/include", path + "/share/include/KF5/KArchive" ]
     }
 
     property stringList libraryPaths: {
-        return []
+        return [ path + "/share/lib" ]
     }
+
+    property bool withArchive: false
 
     name: "QIO"
 

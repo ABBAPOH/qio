@@ -6,6 +6,7 @@ DynamicLibrary {
     Depends { name: "qio" }
 
     cpp.includePaths: project.includePaths
+    cpp.libraryPaths: project.libraryPaths
     cpp.cxxFlags: {
         if (qbs.targetOS.contains("osx"))
             return [ "-std=c++11", "-stdlib=libc++" ]
