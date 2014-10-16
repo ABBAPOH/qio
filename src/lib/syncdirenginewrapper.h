@@ -9,8 +9,6 @@ class QIO_EXPORT SyncDirEngineWrapper : public AbstractDirEngine
 public:
     explicit SyncDirEngineWrapper(AbstractSyncDirEngine *engine);
 
-    void setUrl(const QUrl &url);
-
     QFuture<QString> list(QDir::Filters filters) Q_DECL_OVERRIDE;
     QFuture<FileInfo> entryList(QDir::Filters filters) Q_DECL_OVERRIDE;
     QFuture<bool> mkdir(const QString &dirName) Q_DECL_OVERRIDE;
