@@ -1,5 +1,20 @@
 #include "syncdirenginewrapper.h"
 
+struct FileOperation
+{
+    FileOperation(AbstractSyncDirEngine *engine, const QUrl &url, const QString &name = QString()) :
+        engine(engine),
+        url(url),
+        name(name)
+    {}
+
+    AbstractSyncDirEngine *engine;
+    QUrl url;
+    QString name;
+};
+
+typedef void (*Handler)(QFutureInterface<bool> &future, FileOperation operation);
+
 SyncDirEngineWrapper::SyncDirEngineWrapper(AbstractSyncDirEngine *engine) :
     m_engine(engine),
     m_runner(new Runner)
@@ -15,106 +30,67 @@ SyncDirEngineWrapper::~SyncDirEngineWrapper()
 
 QFuture<QString> SyncDirEngineWrapper::list(QDir::Filters filters)
 {
-    typedef void (*func)(QFutureInterface<QString> &future,
-                         AbstractSyncDirEngine *engine,
-                         QUrl url,
-                         QDir::Filters filters);
-    func f = [](QFutureInterface<QString> &future,
-            AbstractSyncDirEngine *engine,
-            QUrl url,
-            QDir::Filters filters) {
-        engine->setUrl(url);
-        const QStringList list = engine->list(filters);
+    typedef void (*Func)(QFutureInterface<QString> &, FileOperation, QDir::Filters);
+    Func f = [](QFutureInterface<QString> &future, FileOperation op, QDir::Filters filters) {
+        op.engine->setUrl(op.url);
+        const QStringList list = op.engine->list(filters);
         foreach (const QString &fileName, list) {
             future.reportResult(fileName);
         }
     };
-    return RunnerHelpers::run(m_runner, f, m_engine, url(), filters);
+    return RunnerHelpers::run(m_runner, f, FileOperation(m_engine, url()), filters);
 }
 
 QFuture<FileInfo> SyncDirEngineWrapper::entryList(QDir::Filters filters)
 {
-    typedef void (*func)(QFutureInterface<FileInfo> &future,
-                         AbstractSyncDirEngine *engine,
-                         QUrl url,
-                         QDir::Filters filters);
-    func f = [](QFutureInterface<FileInfo> &future,
-            AbstractSyncDirEngine *engine,
-            QUrl url,
-            QDir::Filters filters) {
-        engine->setUrl(url);
-        const QList<FileInfo> list = engine->entryList(filters);
+    typedef void (*Func)(QFutureInterface<FileInfo> &, FileOperation, QDir::Filters);
+    Func f = [](QFutureInterface<FileInfo> &future, FileOperation op, QDir::Filters filters) {
+        op.engine->setUrl(op.url);
+        const QList<FileInfo> list = op.engine->entryList(filters);
         foreach (const FileInfo &fileInfo, list) {
             future.reportResult(fileInfo);
         }
     };
-    return RunnerHelpers::run(m_runner, f, m_engine, url(), filters);
+    return RunnerHelpers::run(m_runner, f, FileOperation(m_engine, url()), filters);
 }
 
 QFuture<bool> SyncDirEngineWrapper::mkdir(const QString &dirName)
 {
-    typedef void (*func)(QFutureInterface<bool> &future,
-                         AbstractSyncDirEngine *engine,
-                         QUrl url,
-                         QString dirName);
-    func f = [](QFutureInterface<bool> &future,
-            AbstractSyncDirEngine *engine,
-            QUrl url,
-            QString dirName) {
-        engine->setUrl(url);
-        future.reportResult(engine->mkdir(dirName));
+    Handler h = [](QFutureInterface<bool> &future, FileOperation op) {
+        op.engine->setUrl(op.url);
+        future.reportResult(op.engine->mkdir(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, f, m_engine, url(), dirName);
+    return RunnerHelpers::run(m_runner, h, FileOperation(m_engine, url(), dirName));
 }
 
 QFuture<bool> SyncDirEngineWrapper::rmdir(const QString &dirName)
 {
-    typedef void (*func)(QFutureInterface<bool> &future,
-                         AbstractSyncDirEngine *engine,
-                         QUrl url,
-                         QString dirName);
-    func f = [](QFutureInterface<bool> &future,
-            AbstractSyncDirEngine *engine,
-            QUrl url,
-            QString dirName) {
-        engine->setUrl(url);
-        future.reportResult(engine->rmdir(dirName));
+    Handler h = [](QFutureInterface<bool> &future, FileOperation op) {
+        op.engine->setUrl(op.url);
+        future.reportResult(op.engine->rmdir(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, f, m_engine, url(), dirName);
+    return RunnerHelpers::run(m_runner, h, FileOperation(m_engine, url(), dirName));
 }
 
 QFuture<bool> SyncDirEngineWrapper::remove(const QString &fileName)
 {
-    typedef void (*func)(QFutureInterface<bool> &future,
-                         AbstractSyncDirEngine *engine,
-                         QUrl url,
-                         QString fileName);
-    func f = [](QFutureInterface<bool> &future,
-            AbstractSyncDirEngine *engine,
-            QUrl url,
-            QString fileName) {
-        engine->setUrl(url);
-        future.reportResult(engine->remove(fileName));
+    Handler h = [](QFutureInterface<bool> &future, FileOperation op) {
+        op.engine->setUrl(op.url);
+        future.reportResult(op.engine->remove(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, f, m_engine, url(), fileName);
+    return RunnerHelpers::run(m_runner, h, FileOperation(m_engine, url(), fileName));
 }
 
 QFuture<FileInfo> SyncDirEngineWrapper::stat(const QString &fileName)
 {
-    typedef void (*func)(QFutureInterface<FileInfo> &future,
-                         AbstractSyncDirEngine *engine,
-                         QUrl url,
-                         QString fileName);
-    func f = [](QFutureInterface<FileInfo> &future,
-            AbstractSyncDirEngine *engine,
-            QUrl url,
-            QString fileName) {
-        engine->setUrl(url);
-        future.reportResult(engine->stat(fileName));
+    typedef void (*Handler)(QFutureInterface<FileInfo> &, FileOperation);
+    Handler h = [](QFutureInterface<FileInfo> &future, FileOperation op) {
+        op.engine->setUrl(op.url);
+        future.reportResult(op.engine->stat(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, f, m_engine, url(), fileName);
+    return RunnerHelpers::run(m_runner, h, FileOperation(m_engine, url(), fileName));
 }
