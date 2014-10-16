@@ -2,13 +2,13 @@
 
 struct FileOperation
 {
-    FileOperation(AbstractSyncDirEngine *engine, const QUrl &url, const QString &name = QString()) :
-        engine(engine),
+    FileOperation(SyncDirEngineWrapper::SharedStatePointer state, const QUrl &url, const QString &name = QString()) :
+        state(state),
         url(url),
         name(name)
     {}
 
-    AbstractSyncDirEngine *engine;
+    SyncDirEngineWrapper::SharedStatePointer state;
     QUrl url;
     QString name;
 };
@@ -16,7 +16,7 @@ struct FileOperation
 typedef void (*Handler)(QFutureInterface<bool> &future, FileOperation operation);
 
 SyncDirEngineWrapper::SyncDirEngineWrapper(AbstractSyncDirEngine *engine) :
-    m_engine(engine),
+    m_state(new SharedState(engine)),
     m_runner(new Runner)
 {
 }
@@ -24,73 +24,79 @@ SyncDirEngineWrapper::SyncDirEngineWrapper(AbstractSyncDirEngine *engine) :
 SyncDirEngineWrapper::~SyncDirEngineWrapper()
 {
     m_runner->waitForDone();
-    delete m_engine;
     delete m_runner;
+}
+
+void SyncDirEngineWrapper::setUrl(const QUrl &url)
+{
+    AbstractDirEngine::setUrl(url);
+    QMutexLocker l(&m_state->mutex);
+    m_state->engine->setUrl(url);
 }
 
 QFuture<QString> SyncDirEngineWrapper::list(QDir::Filters filters)
 {
     typedef void (*Func)(QFutureInterface<QString> &, FileOperation, QDir::Filters);
     Func f = [](QFutureInterface<QString> &future, FileOperation op, QDir::Filters filters) {
-        op.engine->setUrl(op.url);
-        const QStringList list = op.engine->list(filters);
+        QMutexLocker l(&op.state->mutex);
+        const QStringList list = op.state->engine->list(filters);
         foreach (const QString &fileName, list) {
             future.reportResult(fileName);
         }
     };
-    return RunnerHelpers::run(m_runner, f, FileOperation(m_engine, url()), filters);
+    return RunnerHelpers::run(m_runner, f, FileOperation(m_state, url()), filters);
 }
 
 QFuture<FileInfo> SyncDirEngineWrapper::entryList(QDir::Filters filters)
 {
     typedef void (*Func)(QFutureInterface<FileInfo> &, FileOperation, QDir::Filters);
     Func f = [](QFutureInterface<FileInfo> &future, FileOperation op, QDir::Filters filters) {
-        op.engine->setUrl(op.url);
-        const QList<FileInfo> list = op.engine->entryList(filters);
+        QMutexLocker l(&op.state->mutex);
+        const QList<FileInfo> list = op.state->engine->entryList(filters);
         foreach (const FileInfo &fileInfo, list) {
             future.reportResult(fileInfo);
         }
     };
-    return RunnerHelpers::run(m_runner, f, FileOperation(m_engine, url()), filters);
+    return RunnerHelpers::run(m_runner, f, FileOperation(m_state, url()), filters);
 }
 
 QFuture<bool> SyncDirEngineWrapper::mkdir(const QString &dirName)
 {
     Handler h = [](QFutureInterface<bool> &future, FileOperation op) {
-        op.engine->setUrl(op.url);
-        future.reportResult(op.engine->mkdir(op.name));
+        QMutexLocker l(&op.state->mutex);
+        future.reportResult(op.state->engine->mkdir(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, h, FileOperation(m_engine, url(), dirName));
+    return RunnerHelpers::run(m_runner, h, FileOperation(m_state, url(), dirName));
 }
 
 QFuture<bool> SyncDirEngineWrapper::rmdir(const QString &dirName)
 {
     Handler h = [](QFutureInterface<bool> &future, FileOperation op) {
-        op.engine->setUrl(op.url);
-        future.reportResult(op.engine->rmdir(op.name));
+        QMutexLocker l(&op.state->mutex);
+        future.reportResult(op.state->engine->rmdir(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, h, FileOperation(m_engine, url(), dirName));
+    return RunnerHelpers::run(m_runner, h, FileOperation(m_state, url(), dirName));
 }
 
 QFuture<bool> SyncDirEngineWrapper::remove(const QString &fileName)
 {
     Handler h = [](QFutureInterface<bool> &future, FileOperation op) {
-        op.engine->setUrl(op.url);
-        future.reportResult(op.engine->remove(op.name));
+        QMutexLocker l(&op.state->mutex);
+        future.reportResult(op.state->engine->remove(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, h, FileOperation(m_engine, url(), fileName));
+    return RunnerHelpers::run(m_runner, h, FileOperation(m_state, url(), fileName));
 }
 
 QFuture<FileInfo> SyncDirEngineWrapper::stat(const QString &fileName)
 {
     typedef void (*Handler)(QFutureInterface<FileInfo> &, FileOperation);
     Handler h = [](QFutureInterface<FileInfo> &future, FileOperation op) {
-        op.engine->setUrl(op.url);
-        future.reportResult(op.engine->stat(op.name));
+        QMutexLocker l(&op.state->mutex);
+        future.reportResult(op.state->engine->stat(op.name));
     };
 
-    return RunnerHelpers::run(m_runner, h, FileOperation(m_engine, url(), fileName));
+    return RunnerHelpers::run(m_runner, h, FileOperation(m_state, url(), fileName));
 }

@@ -11,6 +11,8 @@ public:
     explicit SyncDirEngineWrapper(AbstractSyncDirEngine *engine);
     ~SyncDirEngineWrapper();
 
+    void setUrl(const QUrl &url);
+
     QFuture<QString> list(QDir::Filters filters) Q_DECL_OVERRIDE;
     QFuture<FileInfo> entryList(QDir::Filters filters) Q_DECL_OVERRIDE;
     QFuture<bool> mkdir(const QString &dirName) Q_DECL_OVERRIDE;
@@ -19,8 +21,19 @@ public:
     QFuture<FileInfo> stat(const QString &fileName) Q_DECL_OVERRIDE;
 
 private:
-    AbstractSyncDirEngine *m_engine;
+    struct SharedState
+    {
+        SharedState(AbstractSyncDirEngine *engine) : engine(engine) {}
+
+        QMutex mutex;
+        QScopedPointer<AbstractSyncDirEngine> engine;
+    };
+    typedef QSharedPointer<SharedState> SharedStatePointer;
+
+    SharedStatePointer m_state;
     Runner *m_runner;
+
+    friend struct FileOperation;
 };
 
 #endif // SYNCDIRENGINEWRAPPER_H
