@@ -1,6 +1,6 @@
 #include "fileplugin.h"
 
-#include "syncdirengine.h"
+#include "fileentryengine.h"
 #ifdef Q_OS_WIN
 #include "fileenginewin.h"
 #endif
@@ -38,5 +38,5 @@ AbstractDirEngine *FilePlugin::createDirEngine(const QString &scheme) const
     if (scheme != "qrc" && scheme != "file")
         return Q_NULLPTR;
 
-    return new SyncDirEngineWrapper(new SyncDirEngine);
+    return new SyncDirEngineWrapper(new FileEntryEngine);
 }

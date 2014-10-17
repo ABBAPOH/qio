@@ -1,9 +1,9 @@
-#ifndef SYNCDIRENGINE_H
-#define SYNCDIRENGINE_H
+#ifndef FILEENTRYENGINE_H
+#define FILEENTRYENGINE_H
 
 #include <QIO/AbstractSyncFileEntryEngine>
 
-class SyncDirEngine : public AbstractSyncFileEntryEngine
+class FileEntryEngine : public AbstractSyncFileEntryEngine
 {
 public:
     QStringList list(QDir::Filters filters) Q_DECL_OVERRIDE;
@@ -15,4 +15,4 @@ public:
     FileInfo stat(const QString &fileName) Q_DECL_OVERRIDE;
 };
 
-#endif // SYNCDIRENGINE_H
+#endif // FILEENTRYENGINE_H

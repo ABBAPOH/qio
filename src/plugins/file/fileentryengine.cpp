@@ -1,4 +1,4 @@
-#include "syncdirengine.h"
+#include "fileentryengine.h"
 
 #include <QIO/FileEntry>
 #include <QIO/FileInfoData>
@@ -21,12 +21,12 @@ static FileInfo fromQFileInfo(const QFileInfo &info)
     return FileInfo(d);
 }
 
-QStringList SyncDirEngine::list(QDir::Filters filters)
+QStringList FileEntryEngine::list(QDir::Filters filters)
 {
     return QDir(url().toLocalFile()).entryList(filters);
 }
 
-QList<FileInfo> SyncDirEngine::entryList(QDir::Filters filters)
+QList<FileInfo> FileEntryEngine::entryList(QDir::Filters filters)
 {
     QList<FileInfo> result;
 
@@ -36,27 +36,27 @@ QList<FileInfo> SyncDirEngine::entryList(QDir::Filters filters)
     return result;
 }
 
-bool SyncDirEngine::mkdir(const QString &dirName)
+bool FileEntryEngine::mkdir(const QString &dirName)
 {
     return QDir(url().toLocalFile()).mkdir(dirName);
 }
 
-bool SyncDirEngine::rmdir(const QString &dirName)
+bool FileEntryEngine::rmdir(const QString &dirName)
 {
     return QDir().rmdir(FileEntry::absoluteUrl(url(), dirName).toLocalFile());
 }
 
-bool SyncDirEngine::remove(const QString &fileName)
+bool FileEntryEngine::remove(const QString &fileName)
 {
     return QDir().remove(FileEntry::absoluteUrl(url(), fileName).toLocalFile());
 }
 
-bool SyncDirEngine::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
+bool FileEntryEngine::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
 {
     return QFile::setPermissions(fileName, permissions);
 }
 
-FileInfo SyncDirEngine::stat(const QString &fileName)
+FileInfo FileEntryEngine::stat(const QString &fileName)
 {
     return fromQFileInfo(QFileInfo(FileEntry::absoluteUrl(url(), fileName).toLocalFile()));
 }

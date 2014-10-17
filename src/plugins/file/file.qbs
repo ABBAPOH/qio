@@ -8,10 +8,10 @@ Plugin {
     files: [
         "fileenginefallback.cpp",
         "fileenginefallback.h",
+        "fileentryengine.h",
+        "fileentryengine.cpp",
         "fileplugin.cpp",
-        "fileplugin.h",
-        "syncdirengine.h",
-        "syncdirengine.cpp"
+        "fileplugin.h"
     ]
 
     Group {
