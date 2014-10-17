@@ -94,6 +94,7 @@ FileInfo ArchiveEntryEngine::fromEntry(const KArchiveEntry *entry, const QString
     d->created = entry->date();
     d->lastModified = entry->date();
     d->lastRead = entry->date();
+    // TODO: get permissions
 //    d->mimeTypeName = QMimeDatabase().mimeTypesForFileName(name).first().name();
 
     return FileInfo(d);

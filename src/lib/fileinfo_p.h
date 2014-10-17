@@ -17,6 +17,8 @@ public:
     QDateTime lastModified;
     QDateTime lastRead;
 
+    QFile::Permissions permissions;
+
     QString mimeTypeName;
 };
 

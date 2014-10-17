@@ -15,6 +15,7 @@ static FileInfo fromQFileInfo(const QFileInfo &info)
     d->created = info.created();
     d->lastModified = info.lastModified();
     d->lastRead = info.lastRead();
+    d->permissions = info.permissions();
     d->mimeTypeName = QMimeDatabase().mimeTypeForUrl(d->url).name();
 
     return FileInfo(d);

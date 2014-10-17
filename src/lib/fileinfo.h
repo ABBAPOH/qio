@@ -3,6 +3,7 @@
 
 #include <QtCore/QDateTime>
 #include <QtCore/QDebug>
+#include <QtCore/QFile>
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QUrl>
 
@@ -29,6 +30,8 @@ public:
     QDateTime created() const;
     QDateTime lastModified() const;
     QDateTime lastRead() const;
+
+    QFile::Permissions permissions() const;
 
     QString mimeTypeName() const;
 

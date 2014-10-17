@@ -69,6 +69,11 @@ QDateTime FileInfo::lastRead() const
     return d->lastRead;
 }
 
+QFileDevice::Permissions FileInfo::permissions() const
+{
+    return d->permissions;
+}
+
 QString FileInfo::mimeTypeName() const
 {
     return d->mimeTypeName;
