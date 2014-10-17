@@ -1,5 +1,5 @@
-#ifndef ABSTRACTFILEENGINEHANDLER_H
-#define ABSTRACTFILEENGINEHANDLER_H
+#ifndef ABSTRACTFILEENGINEPLUGIN_H
+#define ABSTRACTFILEENGINEPLUGIN_H
 
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
@@ -20,4 +20,4 @@ public:
     virtual AbstractDirEngine *createDirEngine(const QString &scheme) const = 0;
 };
 
-#endif // ABSTRACTFILEENGINEHANDLER_H
+#endif // ABSTRACTFILEENGINEPLUGIN_H
