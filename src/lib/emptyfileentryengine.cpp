@@ -34,6 +34,13 @@ QFuture<bool> EmptyFileEntryEngine::remove(const QString &fileName)
     return QFuture<bool>();
 }
 
+QFuture<bool> EmptyFileEntryEngine::rename(const QString &oldName, const QString &newName)
+{
+    Q_UNUSED(oldName);
+    Q_UNUSED(newName);
+    return QFuture<bool>();
+}
+
 QFuture<bool> EmptyFileEntryEngine::setPermissions(const QString &fileName,
                                              QFileDevice::Permissions permissions)
 {

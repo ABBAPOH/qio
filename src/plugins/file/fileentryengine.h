@@ -11,6 +11,7 @@ public:
     bool mkdir(const QString &dirName, bool createParents) Q_DECL_OVERRIDE;
     bool rmdir(const QString &dirName, bool removeEmptyParents) Q_DECL_OVERRIDE;
     bool remove(const QString &fileName) Q_DECL_OVERRIDE;
+    bool rename(const QString &oldName, const QString &newName) Q_DECL_OVERRIDE;
     bool setPermissions(const QString &fileName, QFile::Permissions permissions) Q_DECL_OVERRIDE;
     FileInfo stat(const QString &fileName) Q_DECL_OVERRIDE;
 };

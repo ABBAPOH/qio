@@ -85,6 +85,18 @@ QFuture<bool> SyncDirEngineWrapper::remove(const QString &fileName)
     return QtConcurrent::run(h, FileOperation(m_state, url(), fileName));
 }
 
+QFuture<bool> SyncDirEngineWrapper::rename(const QString &oldName, const QString &newName)
+{
+    typedef void (*Handler)(QFutureInterface<bool> &, FileOperation, QString);
+    Handler h = [](QFutureInterface<bool> &future, FileOperation op, QString newName) {
+        QMutexLocker l(&op.state->mutex);
+        op.state->engine->setUrl(op.url);
+        future.reportResult(op.state->engine->rename(op.name, newName));
+    };
+
+    return QtConcurrent::run(h, FileOperation(m_state, url(), oldName), newName);
+}
+
 QFuture<bool> SyncDirEngineWrapper::setPermissions(const QString &fileName, QFile::Permissions permissions)
 {
     typedef void (*Handler)(QFutureInterface<bool> &, FileOperation, QFile::Permissions);

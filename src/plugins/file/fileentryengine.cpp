@@ -57,6 +57,13 @@ bool FileEntryEngine::remove(const QString &fileName)
     return QDir().remove(FileEntry::absoluteUrl(url(), fileName).toLocalFile());
 }
 
+bool FileEntryEngine::rename(const QString &oldName, const QString &newName)
+{
+    const QUrl oldUrl = FileEntry::absoluteUrl(url(), oldName);
+    const QUrl newUrl = FileEntry::absoluteUrl(url(), newName);
+    return QFile::rename(oldUrl.toLocalFile(), newUrl.toLocalFile());
+}
+
 bool FileEntryEngine::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
 {
     return QFile::setPermissions(fileName, permissions);

@@ -73,6 +73,13 @@ bool ArchiveEntryEngine::remove(const QString &fileName)
     return false;
 }
 
+bool ArchiveEntryEngine::rename(const QString &oldName, const QString &newName)
+{
+    Q_UNUSED(oldName);
+    Q_UNUSED(newName);
+    return false;
+}
+
 bool ArchiveEntryEngine::setPermissions(const QString &fileName,
                                         QFileDevice::Permissions permissions)
 {
