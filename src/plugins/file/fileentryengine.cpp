@@ -36,14 +36,20 @@ QList<FileInfo> FileEntryEngine::entryList(QDir::Filters filters)
     return result;
 }
 
-bool FileEntryEngine::mkdir(const QString &dirName)
+bool FileEntryEngine::mkdir(const QString &dirName, bool createParents)
 {
-    return QDir(url().toLocalFile()).mkdir(dirName);
+    if (createParents)
+        return QDir(url().toLocalFile()).mkpath(dirName);
+    else
+        return QDir(url().toLocalFile()).mkdir(dirName);
 }
 
-bool FileEntryEngine::rmdir(const QString &dirName)
+bool FileEntryEngine::rmdir(const QString &dirName, bool removeEmptyParents)
 {
-    return QDir().rmdir(FileEntry::absoluteUrl(url(), dirName).toLocalFile());
+    if (removeEmptyParents)
+        return QDir().rmpath(FileEntry::absoluteUrl(url(), dirName).toLocalFile());
+    else
+        return QDir().rmdir(FileEntry::absoluteUrl(url(), dirName).toLocalFile());
 }
 
 bool FileEntryEngine::remove(const QString &fileName)

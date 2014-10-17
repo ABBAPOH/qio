@@ -116,26 +116,22 @@ QFuture<FileInfo> FileEntry::entryList(QDir::Filters filters)
 
 QFuture<bool> FileEntry::mkdir(const QString &fileName)
 {
-    return d->engine->mkdir(fileName);
+    return d->engine->mkdir(fileName, false);
 }
 
 QFuture<bool> FileEntry::rmdir(const QString &fileName)
 {
-    return d->engine->rmdir(fileName);
+    return d->engine->rmdir(fileName, false);
 }
 
 QFuture<bool> FileEntry::mkpath(const QString &dirPath)
 {
-    Q_UNUSED(dirPath);
-    Q_UNIMPLEMENTED();
-    return QFuture<bool>();
+    return d->engine->mkdir(dirPath, true);
 }
 
 QFuture<bool> FileEntry::rmpath(const QString &dirPath)
 {
-    Q_UNUSED(dirPath);
-    Q_UNIMPLEMENTED();
-    return QFuture<bool>();
+    return d->engine->rmdir(dirPath, true);
 }
 
 QFuture<bool> FileEntry::touch(const QString &fileName)

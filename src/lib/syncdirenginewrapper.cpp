@@ -50,26 +50,28 @@ QFuture<FileInfo> SyncDirEngineWrapper::entryList(QDir::Filters filters)
     return QtConcurrent::run(f, FileOperation(m_state, url()), filters);
 }
 
-QFuture<bool> SyncDirEngineWrapper::mkdir(const QString &dirName)
+QFuture<bool> SyncDirEngineWrapper::mkdir(const QString &dirName, bool createParents)
 {
-    Handler h = [](QFutureInterface<bool> &future, FileOperation op) {
+    typedef void (*Handler)(QFutureInterface<bool> &, FileOperation, bool);
+    Handler h = [](QFutureInterface<bool> &future, FileOperation op, bool createParents) {
         QMutexLocker l(&op.state->mutex);
         op.state->engine->setUrl(op.url);
-        future.reportResult(op.state->engine->mkdir(op.name));
+        future.reportResult(op.state->engine->mkdir(op.name, createParents));
     };
 
-    return QtConcurrent::run(h, FileOperation(m_state, url(), dirName));
+    return QtConcurrent::run(h, FileOperation(m_state, url(), dirName), createParents);
 }
 
-QFuture<bool> SyncDirEngineWrapper::rmdir(const QString &dirName)
+QFuture<bool> SyncDirEngineWrapper::rmdir(const QString &dirName, bool removeEmptyParents)
 {
-    Handler h = [](QFutureInterface<bool> &future, FileOperation op) {
+    typedef void (*Handler)(QFutureInterface<bool> &, FileOperation, bool);
+    Handler h = [](QFutureInterface<bool> &future, FileOperation op, bool removeEmptyParents) {
         QMutexLocker l(&op.state->mutex);
         op.state->engine->setUrl(op.url);
-        future.reportResult(op.state->engine->rmdir(op.name));
+        future.reportResult(op.state->engine->rmdir(op.name, removeEmptyParents));
     };
 
-    return QtConcurrent::run(h, FileOperation(m_state, url(), dirName));
+    return QtConcurrent::run(h, FileOperation(m_state, url(), dirName), removeEmptyParents);
 }
 
 QFuture<bool> SyncDirEngineWrapper::remove(const QString &fileName)

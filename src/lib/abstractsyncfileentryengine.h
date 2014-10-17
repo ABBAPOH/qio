@@ -18,8 +18,8 @@ public:
     // TODO: use iterator
     virtual QStringList list(QDir::Filters filters) = 0;
     virtual QList<FileInfo> entryList(QDir::Filters filters) = 0;
-    virtual bool mkdir(const QString &fileName) = 0;
-    virtual bool rmdir(const QString &fileName) = 0;
+    virtual bool mkdir(const QString &fileName, bool createParents) = 0;
+    virtual bool rmdir(const QString &fileName, bool removeEmptyParents) = 0;
     virtual bool remove(const QString &fileName) = 0;
     virtual bool setPermissions(const QString &fileName, QFile::Permissions permissions) = 0;
     virtual FileInfo stat(const QString &fileName) = 0;

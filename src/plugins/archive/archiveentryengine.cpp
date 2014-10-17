@@ -58,12 +58,12 @@ QList<FileInfo> ArchiveEntryEngine::entryList(QDir::Filters filters)
     return result;
 }
 
-bool ArchiveEntryEngine::mkdir(const QString &fileName)
+bool ArchiveEntryEngine::mkdir(const QString &fileName, bool createParents)
 {
     return false;
 }
 
-bool ArchiveEntryEngine::rmdir(const QString &fileName)
+bool ArchiveEntryEngine::rmdir(const QString &fileName, bool removeEmptyParents)
 {
     return false;
 }

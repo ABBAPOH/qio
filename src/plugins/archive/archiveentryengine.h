@@ -13,8 +13,8 @@ public:
 
     QStringList list(QDir::Filters filters) Q_DECL_OVERRIDE;
     QList<FileInfo> entryList(QDir::Filters filters) Q_DECL_OVERRIDE;
-    bool mkdir(const QString &fileName) Q_DECL_OVERRIDE;
-    bool rmdir(const QString &fileName) Q_DECL_OVERRIDE;
+    bool mkdir(const QString &fileName, bool createParents) Q_DECL_OVERRIDE;
+    bool rmdir(const QString &fileName, bool removeEmptyParents) Q_DECL_OVERRIDE;
     bool remove(const QString &fileName) Q_DECL_OVERRIDE;
     bool setPermissions(const QString &fileName,
                         QFileDevice::Permissions permissions) Q_DECL_OVERRIDE;
