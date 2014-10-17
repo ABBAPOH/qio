@@ -73,6 +73,14 @@ bool ArchiveEntryEngine::remove(const QString &fileName)
     return false;
 }
 
+bool ArchiveEntryEngine::setPermissions(const QString &fileName,
+                                        QFileDevice::Permissions permissions)
+{
+    Q_UNUSED(fileName);
+    Q_UNUSED(permissions);
+    return false;
+}
+
 FileInfo ArchiveEntryEngine::stat(const QString &fileName)
 {
     return fromEntry(getEntry(m_archive.data(), m_relativePath + "/" + fileName), fileName);

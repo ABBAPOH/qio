@@ -83,6 +83,18 @@ QFuture<bool> SyncDirEngineWrapper::remove(const QString &fileName)
     return QtConcurrent::run(h, FileOperation(m_state, url(), fileName));
 }
 
+QFuture<bool> SyncDirEngineWrapper::setPermissions(const QString &fileName, QFile::Permissions permissions)
+{
+    typedef void (*Handler)(QFutureInterface<bool> &, FileOperation, QFile::Permissions);
+    Handler h = [](QFutureInterface<bool> &future, FileOperation op, QFile::Permissions permissions) {
+        QMutexLocker l(&op.state->mutex);
+        op.state->engine->setUrl(op.url);
+        future.reportResult(op.state->engine->setPermissions(op.name, permissions));
+    };
+
+    return QtConcurrent::run(h, FileOperation(m_state, url(), fileName), permissions);
+}
+
 QFuture<FileInfo> SyncDirEngineWrapper::stat(const QString &fileName)
 {
     typedef void (*Handler)(QFutureInterface<FileInfo> &, FileOperation);

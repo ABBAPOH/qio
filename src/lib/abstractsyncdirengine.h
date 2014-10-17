@@ -21,6 +21,7 @@ public:
     virtual bool mkdir(const QString &fileName) = 0;
     virtual bool rmdir(const QString &fileName) = 0;
     virtual bool remove(const QString &fileName) = 0;
+    virtual bool setPermissions(const QString &fileName, QFile::Permissions permissions) = 0;
     virtual FileInfo stat(const QString &fileName) = 0;
 
 private:

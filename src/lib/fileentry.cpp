@@ -134,6 +134,11 @@ QFuture<FileInfo> FileEntry::stat(const QString &fileName)
     return d->engine->stat(fileName);
 }
 
+QFuture<bool> FileEntry::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
+{
+    return d->engine->setPermissions(fileName, permissions);
+}
+
 QFuture<bool> FileEntry::touch(const QString &fileName)
 {
     typedef void (*func)(QFutureInterface<bool> &future, QUrl url);

@@ -21,6 +21,8 @@ public:
     virtual QFuture<bool> mkdir(const QString &dirName) = 0;
     virtual QFuture<bool> rmdir(const QString &dirName) = 0;
     virtual QFuture<bool> remove(const QString &fileName) = 0;
+    virtual QFuture<bool> setPermissions(const QString &fileName,
+                                         QFileDevice::Permissions permissions) = 0;
     virtual QFuture<FileInfo> stat(const QString &fileName) = 0;
 
     static AbstractDirEngine *emptyEngine();

@@ -51,6 +51,11 @@ bool SyncDirEngine::remove(const QString &fileName)
     return QDir().remove(FileEntry::absoluteUrl(url(), fileName).toLocalFile());
 }
 
+bool SyncDirEngine::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
+{
+    return QFile::setPermissions(fileName, permissions);
+}
+
 FileInfo SyncDirEngine::stat(const QString &fileName)
 {
     return fromQFileInfo(QFileInfo(FileEntry::absoluteUrl(url(), fileName).toLocalFile()));

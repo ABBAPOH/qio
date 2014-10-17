@@ -29,6 +29,7 @@ public:
     QFuture<bool> rmdir(const QString &fileName = QString());
     QFuture<bool> remove(const QString &fileName = QString());
     QFuture<FileInfo> stat(const QString &fileName = QString());
+    QFuture<bool> setPermissions(const QString &fileName, QFileDevice::Permissions permissions);
     QFuture<bool> touch(const QString &fileName = QString());
     QFuture<bool> removeRecursively(const QString &fileName = QString());
 
