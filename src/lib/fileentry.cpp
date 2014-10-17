@@ -124,19 +124,18 @@ QFuture<bool> FileEntry::rmdir(const QString &fileName)
     return d->engine->rmdir(fileName);
 }
 
-QFuture<bool> FileEntry::remove(const QString &fileName)
+QFuture<bool> FileEntry::mkpath(const QString &dirPath)
 {
-    return d->engine->remove(fileName);
+    Q_UNUSED(dirPath);
+    Q_UNIMPLEMENTED();
+    return QFuture<bool>();
 }
 
-QFuture<FileInfo> FileEntry::stat(const QString &fileName)
+QFuture<bool> FileEntry::rmpath(const QString &dirPath)
 {
-    return d->engine->stat(fileName);
-}
-
-QFuture<bool> FileEntry::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
-{
-    return d->engine->setPermissions(fileName, permissions);
+    Q_UNUSED(dirPath);
+    Q_UNIMPLEMENTED();
+    return QFuture<bool>();
 }
 
 QFuture<bool> FileEntry::touch(const QString &fileName)
@@ -148,6 +147,55 @@ QFuture<bool> FileEntry::touch(const QString &fileName)
         future.reportResult(ok);
     };
     return QtConcurrent::run(f, absoluteUrl(this->url(), fileName));
+}
+
+QFuture<bool> FileEntry::remove(const QString &fileName)
+{
+    return d->engine->remove(fileName);
+}
+
+/*!
+    Renames this file entry to the \a newName.
+*/
+QFuture<bool> FileEntry::rename(const QString &newName)
+{
+    Q_UNUSED(newName);
+    Q_UNIMPLEMENTED();
+    return QFuture<bool>();
+}
+
+/*!
+    Renames file or directory at \a oldName to the \a newName.
+*/
+QFuture<bool> FileEntry::rename(const QString &oldName, const QString &newName)
+{
+    Q_UNUSED(oldName);
+    Q_UNUSED(newName);
+    Q_UNIMPLEMENTED();
+    return QFuture<bool>();
+}
+
+/*!
+    Creates a link named linkName that points to this file.
+
+    \note link can be created only on the same filesystem (if supported) and it
+    is not possible to specify url to the other filesystem
+*/
+QFuture<bool> FileEntry::link(const QString &linkPath)
+{
+    Q_UNUSED(linkPath);
+    Q_UNIMPLEMENTED();
+    return QFuture<bool>();
+}
+
+QFuture<FileInfo> FileEntry::stat(const QString &fileName)
+{
+    return d->engine->stat(fileName);
+}
+
+QFuture<bool> FileEntry::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
+{
+    return d->engine->setPermissions(fileName, permissions);
 }
 
 static bool doRemove(const FileInfo &info)
