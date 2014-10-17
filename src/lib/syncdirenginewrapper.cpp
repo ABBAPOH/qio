@@ -17,7 +17,7 @@ struct FileOperation
 
 typedef void (*Handler)(QFutureInterface<bool> &future, FileOperation operation);
 
-SyncDirEngineWrapper::SyncDirEngineWrapper(AbstractSyncDirEngine *engine) :
+SyncDirEngineWrapper::SyncDirEngineWrapper(AbstractSyncFileEntryEngine *engine) :
     m_state(new SharedState(engine))
 {
 }

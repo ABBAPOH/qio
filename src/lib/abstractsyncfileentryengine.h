@@ -6,11 +6,11 @@
 #include <QtCore/QDir>
 #include <QtCore/QUrl>
 
-class QIO_EXPORT AbstractSyncDirEngine
+class QIO_EXPORT AbstractSyncFileEntryEngine
 {
 public:
-    AbstractSyncDirEngine();
-    virtual ~AbstractSyncDirEngine();
+    AbstractSyncFileEntryEngine();
+    virtual ~AbstractSyncFileEntryEngine();
 
     QUrl url() const;
     virtual void setUrl(const QUrl &url);

@@ -23,7 +23,7 @@ ArchiveEntryEngine::ArchiveEntryEngine()
 void ArchiveEntryEngine::setUrl(const QUrl &url)
 {
     const QUrl oldUrl = this->url();
-    AbstractSyncDirEngine::setUrl(url);
+    AbstractSyncFileEntryEngine::setUrl(url);
     if (url != oldUrl) {
         if (url.scheme() == "zip") {
             const QString path = url.path();

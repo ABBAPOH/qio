@@ -2,12 +2,12 @@
 #define SYNCDIRENGINEWRAPPER_H
 
 #include <QIO/AbstractDirEngine>
-#include <QIO/AbstractSyncDirEngine>
+#include <QIO/AbstractSyncFileEntryEngine>
 
 class QIO_EXPORT SyncDirEngineWrapper : public AbstractDirEngine
 {
 public:
-    explicit SyncDirEngineWrapper(AbstractSyncDirEngine *engine);
+    explicit SyncDirEngineWrapper(AbstractSyncFileEntryEngine *engine);
 
     QFuture<QString> list(QDir::Filters filters) Q_DECL_OVERRIDE;
     QFuture<FileInfo> entryList(QDir::Filters filters) Q_DECL_OVERRIDE;
@@ -20,10 +20,10 @@ public:
 private:
     struct SharedState
     {
-        SharedState(AbstractSyncDirEngine *engine) : engine(engine) {}
+        SharedState(AbstractSyncFileEntryEngine *engine) : engine(engine) {}
 
         QMutex mutex;
-        QScopedPointer<AbstractSyncDirEngine> engine;
+        QScopedPointer<AbstractSyncFileEntryEngine> engine;
     };
     typedef QSharedPointer<SharedState> SharedStatePointer;
 

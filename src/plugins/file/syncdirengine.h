@@ -1,9 +1,9 @@
 #ifndef SYNCDIRENGINE_H
 #define SYNCDIRENGINE_H
 
-#include <QIO/AbstractSyncDirEngine>
+#include <QIO/AbstractSyncFileEntryEngine>
 
-class SyncDirEngine : public AbstractSyncDirEngine
+class SyncDirEngine : public AbstractSyncFileEntryEngine
 {
 public:
     QStringList list(QDir::Filters filters) Q_DECL_OVERRIDE;

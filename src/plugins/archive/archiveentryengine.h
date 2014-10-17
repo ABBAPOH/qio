@@ -1,10 +1,10 @@
 #ifndef ARCHIVEENTRYENGINE_H
 #define ARCHIVEENTRYENGINE_H
 
-#include <QIO/AbstractSyncDirEngine>
+#include <QIO/AbstractSyncFileEntryEngine>
 #include <KF5/KArchive/KArchive>
 
-class ArchiveEntryEngine : public AbstractSyncDirEngine
+class ArchiveEntryEngine : public AbstractSyncFileEntryEngine
 {
 public:
     ArchiveEntryEngine();
