@@ -2,6 +2,7 @@
 #define FILEENTRY_H
 
 #include <QIO/FileInfo>
+#include <QIO/FileResult>
 
 #include <QtCore/QDir>
 #include <QtCore/QFuture>
@@ -26,23 +27,23 @@ public:
     QFuture<QString> list(QDir::Filters filters = QDir::NoFilter);
     QFuture<FileInfo> entryList(QDir::Filters filters = QDir::NoFilter);
 
-    QFuture<bool> mkdir(const QString &fileName);
-    QFuture<bool> rmdir(const QString &fileName = QString());
+    QFuture<FileResult> mkdir(const QString &fileName);
+    QFuture<FileResult> rmdir(const QString &fileName = QString());
 
-    QFuture<bool> mkpath(const QString &dirPath = QString());
-    QFuture<bool> rmpath(const QString &dirPath = QString());
+    QFuture<FileResult> mkpath(const QString &dirPath = QString());
+    QFuture<FileResult> rmpath(const QString &dirPath = QString());
 
-    QFuture<bool> touch(const QString &fileName = QString());
-    QFuture<bool> remove(const QString &fileName = QString());
+    QFuture<FileResult> touch(const QString &fileName = QString());
+    QFuture<FileResult> remove(const QString &fileName = QString());
 
-    QFuture<bool> rename(const QString &newName);
-    QFuture<bool> rename(const QString &oldName, const QString &newName);
+    QFuture<FileResult> rename(const QString &newName);
+    QFuture<FileResult> rename(const QString &oldName, const QString &newName);
 
     QFuture<bool> link(const QString &linkPath);
 
     QFuture<FileInfo> stat(const QString &fileName = QString());
 
-    QFuture<bool> setPermissions(const QString &fileName, QFileDevice::Permissions permissions);
+    QFuture<FileResult> setPermissions(const QString &fileName, QFileDevice::Permissions permissions);
 
     QFuture<bool> removeRecursively(const QString &fileName = QString());
 

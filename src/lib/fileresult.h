@@ -8,10 +8,16 @@ class FileResult
     Q_DECLARE_TR_FUNCTIONS(FileResult)
     typedef bool (FileResult::*RestrictedBool)() const;
 public:
-    enum class Error { Unknown = -1, None = 0, NoEntry = 2 };
+    enum class Error {
+        Unknown = -1,
+        None = 0,
+        NoEntry = 2,
+        NoAccess = 13,
+        NotImplemented
+    };
 
     FileResult();
-    explicit FileResult(Error error);
+    FileResult(Error error);
 
     bool hasError() const;
     Error error() const;

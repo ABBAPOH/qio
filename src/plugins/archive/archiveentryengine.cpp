@@ -58,34 +58,34 @@ QList<FileInfo> ArchiveEntryEngine::entryList(QDir::Filters filters)
     return result;
 }
 
-bool ArchiveEntryEngine::mkdir(const QString &fileName, bool createParents)
+FileResult ArchiveEntryEngine::mkdir(const QString &fileName, bool createParents)
 {
-    return false;
+    return FileResult::Error::NotImplemented;
 }
 
-bool ArchiveEntryEngine::rmdir(const QString &fileName, bool removeEmptyParents)
+FileResult ArchiveEntryEngine::rmdir(const QString &fileName, bool removeEmptyParents)
 {
-    return false;
+    return FileResult::Error::NotImplemented;
 }
 
-bool ArchiveEntryEngine::remove(const QString &fileName)
+FileResult ArchiveEntryEngine::remove(const QString &fileName)
 {
-    return false;
+    return FileResult::Error::NotImplemented;
 }
 
-bool ArchiveEntryEngine::rename(const QString &oldName, const QString &newName)
+FileResult ArchiveEntryEngine::rename(const QString &oldName, const QString &newName)
 {
     Q_UNUSED(oldName);
     Q_UNUSED(newName);
-    return false;
+    return FileResult::Error::NotImplemented;
 }
 
-bool ArchiveEntryEngine::setPermissions(const QString &fileName,
-                                        QFileDevice::Permissions permissions)
+FileResult ArchiveEntryEngine::setPermissions(const QString &fileName,
+                                              QFileDevice::Permissions permissions)
 {
     Q_UNUSED(fileName);
     Q_UNUSED(permissions);
-    return false;
+    return FileResult::Error::NotImplemented;
 }
 
 FileInfo ArchiveEntryEngine::stat(const QString &fileName)

@@ -44,7 +44,7 @@ void MainWindow::mkdir()
 
     FileEntry dir(m_model->rootUrl());
     auto future = dir.mkdir(name);
-    QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>(this);
+    QFutureWatcher<FileResult> *watcher = new QFutureWatcher<FileResult>(this);
     connect(watcher, &QFutureWatcherBase::finished, this, &MainWindow::onMkdirFinished);
     watcher->setFuture(future);
 }

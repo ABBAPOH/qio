@@ -114,38 +114,38 @@ QFuture<FileInfo> FileEntry::entryList(QDir::Filters filters)
     return d->engine->entryList(filters);
 }
 
-QFuture<bool> FileEntry::mkdir(const QString &fileName)
+QFuture<FileResult> FileEntry::mkdir(const QString &fileName)
 {
     return d->engine->mkdir(fileName, false);
 }
 
-QFuture<bool> FileEntry::rmdir(const QString &fileName)
+QFuture<FileResult> FileEntry::rmdir(const QString &fileName)
 {
     return d->engine->rmdir(fileName, false);
 }
 
-QFuture<bool> FileEntry::mkpath(const QString &dirPath)
+QFuture<FileResult> FileEntry::mkpath(const QString &dirPath)
 {
     return d->engine->mkdir(dirPath, true);
 }
 
-QFuture<bool> FileEntry::rmpath(const QString &dirPath)
+QFuture<FileResult> FileEntry::rmpath(const QString &dirPath)
 {
     return d->engine->rmdir(dirPath, true);
 }
 
-QFuture<bool> FileEntry::touch(const QString &fileName)
+QFuture<FileResult> FileEntry::touch(const QString &fileName)
 {
-    typedef void (*func)(QFutureInterface<bool> &future, QUrl url);
-    func f = [](QFutureInterface<bool> &future, QUrl url) {
+    typedef void (*func)(QFutureInterface<FileResult> &future, QUrl url);
+    func f = [](QFutureInterface<FileResult> &future, QUrl url) {
         File file(url);
         const bool ok = file.open(QIODevice::WriteOnly);
-        future.reportResult(ok);
+        future.reportResult(ok ? FileResult() : FileResult::Error::Unknown);
     };
     return QtConcurrent::run(f, absoluteUrl(this->url(), fileName));
 }
 
-QFuture<bool> FileEntry::remove(const QString &fileName)
+QFuture<FileResult> FileEntry::remove(const QString &fileName)
 {
     return d->engine->remove(fileName);
 }
@@ -153,22 +153,22 @@ QFuture<bool> FileEntry::remove(const QString &fileName)
 /*!
     Renames this file entry to the \a newName.
 */
-QFuture<bool> FileEntry::rename(const QString &newName)
+QFuture<FileResult> FileEntry::rename(const QString &newName)
 {
     Q_UNUSED(newName);
     Q_UNIMPLEMENTED();
-    return QFuture<bool>();
+    return QFuture<FileResult>();
 }
 
 /*!
     Renames file or directory at \a oldName to the \a newName.
 */
-QFuture<bool> FileEntry::rename(const QString &oldName, const QString &newName)
+QFuture<FileResult> FileEntry::rename(const QString &oldName, const QString &newName)
 {
     Q_UNUSED(oldName);
     Q_UNUSED(newName);
     Q_UNIMPLEMENTED();
-    return QFuture<bool>();
+    return QFuture<FileResult>();
 }
 
 /*!
@@ -189,7 +189,7 @@ QFuture<FileInfo> FileEntry::stat(const QString &fileName)
     return d->engine->stat(fileName);
 }
 
-QFuture<bool> FileEntry::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
+QFuture<FileResult> FileEntry::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
 {
     return d->engine->setPermissions(fileName, permissions);
 }

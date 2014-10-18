@@ -15,7 +15,7 @@ struct FileOperation
     QString name;
 };
 
-typedef void (*Handler)(QFutureInterface<bool> &future, FileOperation operation);
+typedef void (*Handler)(QFutureInterface<FileResult> &future, FileOperation operation);
 
 SyncDirEngineWrapper::SyncDirEngineWrapper(AbstractSyncFileEntryEngine *engine) :
     m_state(new SharedState(engine))
@@ -50,10 +50,10 @@ QFuture<FileInfo> SyncDirEngineWrapper::entryList(QDir::Filters filters)
     return QtConcurrent::run(f, FileOperation(m_state, url()), filters);
 }
 
-QFuture<bool> SyncDirEngineWrapper::mkdir(const QString &dirName, bool createParents)
+QFuture<FileResult> SyncDirEngineWrapper::mkdir(const QString &dirName, bool createParents)
 {
-    typedef void (*Handler)(QFutureInterface<bool> &, FileOperation, bool);
-    Handler h = [](QFutureInterface<bool> &future, FileOperation op, bool createParents) {
+    typedef void (*Handler)(QFutureInterface<FileResult> &, FileOperation, bool);
+    Handler h = [](QFutureInterface<FileResult> &future, FileOperation op, bool createParents) {
         QMutexLocker l(&op.state->mutex);
         op.state->engine->setUrl(op.url);
         future.reportResult(op.state->engine->mkdir(op.name, createParents));
@@ -62,10 +62,10 @@ QFuture<bool> SyncDirEngineWrapper::mkdir(const QString &dirName, bool createPar
     return QtConcurrent::run(h, FileOperation(m_state, url(), dirName), createParents);
 }
 
-QFuture<bool> SyncDirEngineWrapper::rmdir(const QString &dirName, bool removeEmptyParents)
+QFuture<FileResult> SyncDirEngineWrapper::rmdir(const QString &dirName, bool removeEmptyParents)
 {
-    typedef void (*Handler)(QFutureInterface<bool> &, FileOperation, bool);
-    Handler h = [](QFutureInterface<bool> &future, FileOperation op, bool removeEmptyParents) {
+    typedef void (*Handler)(QFutureInterface<FileResult> &, FileOperation, bool);
+    Handler h = [](QFutureInterface<FileResult> &future, FileOperation op, bool removeEmptyParents) {
         QMutexLocker l(&op.state->mutex);
         op.state->engine->setUrl(op.url);
         future.reportResult(op.state->engine->rmdir(op.name, removeEmptyParents));
@@ -74,9 +74,9 @@ QFuture<bool> SyncDirEngineWrapper::rmdir(const QString &dirName, bool removeEmp
     return QtConcurrent::run(h, FileOperation(m_state, url(), dirName), removeEmptyParents);
 }
 
-QFuture<bool> SyncDirEngineWrapper::remove(const QString &fileName)
+QFuture<FileResult> SyncDirEngineWrapper::remove(const QString &fileName)
 {
-    Handler h = [](QFutureInterface<bool> &future, FileOperation op) {
+    Handler h = [](QFutureInterface<FileResult> &future, FileOperation op) {
         QMutexLocker l(&op.state->mutex);
         op.state->engine->setUrl(op.url);
         future.reportResult(op.state->engine->remove(op.name));
@@ -85,10 +85,10 @@ QFuture<bool> SyncDirEngineWrapper::remove(const QString &fileName)
     return QtConcurrent::run(h, FileOperation(m_state, url(), fileName));
 }
 
-QFuture<bool> SyncDirEngineWrapper::rename(const QString &oldName, const QString &newName)
+QFuture<FileResult> SyncDirEngineWrapper::rename(const QString &oldName, const QString &newName)
 {
-    typedef void (*Handler)(QFutureInterface<bool> &, FileOperation, QString);
-    Handler h = [](QFutureInterface<bool> &future, FileOperation op, QString newName) {
+    typedef void (*Handler)(QFutureInterface<FileResult> &, FileOperation, QString);
+    Handler h = [](QFutureInterface<FileResult> &future, FileOperation op, QString newName) {
         QMutexLocker l(&op.state->mutex);
         op.state->engine->setUrl(op.url);
         future.reportResult(op.state->engine->rename(op.name, newName));
@@ -97,10 +97,10 @@ QFuture<bool> SyncDirEngineWrapper::rename(const QString &oldName, const QString
     return QtConcurrent::run(h, FileOperation(m_state, url(), oldName), newName);
 }
 
-QFuture<bool> SyncDirEngineWrapper::setPermissions(const QString &fileName, QFile::Permissions permissions)
+QFuture<FileResult> SyncDirEngineWrapper::setPermissions(const QString &fileName, QFile::Permissions permissions)
 {
-    typedef void (*Handler)(QFutureInterface<bool> &, FileOperation, QFile::Permissions);
-    Handler h = [](QFutureInterface<bool> &future, FileOperation op, QFile::Permissions permissions) {
+    typedef void (*Handler)(QFutureInterface<FileResult> &, FileOperation, QFile::Permissions);
+    Handler h = [](QFutureInterface<FileResult> &future, FileOperation op, QFile::Permissions permissions) {
         QMutexLocker l(&op.state->mutex);
         op.state->engine->setUrl(op.url);
         future.reportResult(op.state->engine->setPermissions(op.name, permissions));

@@ -36,37 +36,44 @@ QList<FileInfo> FileEntryEngine::entryList(QDir::Filters filters)
     return result;
 }
 
-bool FileEntryEngine::mkdir(const QString &dirName, bool createParents)
+FileResult FileEntryEngine::mkdir(const QString &dirName, bool createParents)
 {
-    if (createParents)
-        return QDir(url().toLocalFile()).mkpath(dirName);
-    else
-        return QDir(url().toLocalFile()).mkdir(dirName);
+    QDir dir(url().toLocalFile());
+    if (!dir.exists())
+        return FileResult::Error::NoEntry;
+
+    const bool ok = createParents ? dir.mkpath(dirName) : dir.mkdir(dirName);
+    if (!ok)
+        return FileResult::Error::Unknown;
+    return FileResult();
 }
 
-bool FileEntryEngine::rmdir(const QString &dirName, bool removeEmptyParents)
+FileResult FileEntryEngine::rmdir(const QString &dirName, bool removeEmptyParents)
 {
-    if (removeEmptyParents)
-        return QDir().rmpath(FileEntry::absoluteUrl(url(), dirName).toLocalFile());
-    else
-        return QDir().rmdir(FileEntry::absoluteUrl(url(), dirName).toLocalFile());
+    const QString localPath = FileEntry::absoluteUrl(url(), dirName).toLocalFile();
+    const bool ok = removeEmptyParents ? QDir().rmpath(localPath) : QDir().rmdir(localPath);
+    if (!ok)
+        return FileResult::Error::Unknown;
+    return FileResult();
 }
 
-bool FileEntryEngine::remove(const QString &fileName)
+FileResult FileEntryEngine::remove(const QString &fileName)
 {
-    return QDir().remove(FileEntry::absoluteUrl(url(), fileName).toLocalFile());
+    const bool ok = QDir().remove(FileEntry::absoluteUrl(url(), fileName).toLocalFile());
+    return ok ? FileResult() : FileResult::Error::Unknown;
 }
 
-bool FileEntryEngine::rename(const QString &oldName, const QString &newName)
+FileResult FileEntryEngine::rename(const QString &oldName, const QString &newName)
 {
     const QUrl oldUrl = FileEntry::absoluteUrl(url(), oldName);
     const QUrl newUrl = FileEntry::absoluteUrl(url(), newName);
-    return QFile::rename(oldUrl.toLocalFile(), newUrl.toLocalFile());
+    bool ok = QFile::rename(oldUrl.toLocalFile(), newUrl.toLocalFile());
+    return ok ? FileResult() : FileResult::Error::Unknown;
 }
 
-bool FileEntryEngine::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
+FileResult FileEntryEngine::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
 {
-    return QFile::setPermissions(fileName, permissions);
+    return QFile::setPermissions(fileName, permissions) ? FileResult() : FileResult::Error::Unknown;
 }
 
 FileInfo FileEntryEngine::stat(const QString &fileName)
