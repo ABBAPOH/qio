@@ -42,6 +42,9 @@ FileResult FileEntryEngine::mkdir(const QString &dirName, bool createParents)
     if (!dir.exists())
         return FileResult::Error::NoEntry;
 
+    if (dir.exists(dirName))
+        return FileResult::Error::Exist;
+
     const bool ok = createParents ? dir.mkpath(dirName) : dir.mkdir(dirName);
     if (!ok)
         return FileResult::Error::Unknown;

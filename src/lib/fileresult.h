@@ -11,8 +11,9 @@ public:
     enum class Error {
         Unknown = -1,
         None = 0,
-        NoEntry = 2,
-        NoAccess = 13,
+        NoEntry,
+        NoAccess,
+        Exist,
         NotImplemented
     };
 
