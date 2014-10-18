@@ -1,7 +1,7 @@
 #ifndef FILEENTRY_H
 #define FILEENTRY_H
 
-#include "fileinfo.h"
+#include <QIO/FileInfo>
 
 #include <QtCore/QDir>
 #include <QtCore/QFuture>
