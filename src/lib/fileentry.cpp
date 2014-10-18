@@ -177,11 +177,11 @@ QFuture<FileResult> FileEntry::rename(const QString &oldName, const QString &new
     \note link can be created only on the same filesystem (if supported) and it
     is not possible to specify url to the other filesystem
 */
-QFuture<bool> FileEntry::link(const QString &linkPath)
+QFuture<FileResult> FileEntry::link(const QString &linkPath)
 {
     Q_UNUSED(linkPath);
     Q_UNIMPLEMENTED();
-    return QFuture<bool>();
+    return QFuture<FileResult>();
 }
 
 QFuture<FileInfo> FileEntry::stat(const QString &fileName)

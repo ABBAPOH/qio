@@ -39,7 +39,7 @@ public:
     QFuture<FileResult> rename(const QString &newName);
     QFuture<FileResult> rename(const QString &oldName, const QString &newName);
 
-    QFuture<bool> link(const QString &linkPath);
+    QFuture<FileResult> link(const QString &linkPath);
 
     QFuture<FileInfo> stat(const QString &fileName = QString());
 
