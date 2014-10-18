@@ -155,9 +155,7 @@ QFuture<FileResult> FileEntry::remove(const QString &fileName)
 */
 QFuture<FileResult> FileEntry::rename(const QString &newName)
 {
-    Q_UNUSED(newName);
-    Q_UNIMPLEMENTED();
-    return QFuture<FileResult>();
+    return d->engine->rename(QString(), newName);
 }
 
 /*!
@@ -165,10 +163,7 @@ QFuture<FileResult> FileEntry::rename(const QString &newName)
 */
 QFuture<FileResult> FileEntry::rename(const QString &oldName, const QString &newName)
 {
-    Q_UNUSED(oldName);
-    Q_UNUSED(newName);
-    Q_UNIMPLEMENTED();
-    return QFuture<FileResult>();
+    return d->engine->rename(oldName, newName);
 }
 
 /*!
