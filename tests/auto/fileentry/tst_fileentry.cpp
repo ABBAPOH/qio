@@ -14,6 +14,7 @@ private slots:
     void rmdir();
     void touch();
     void remove();
+    void rename();
     void removeRecursively();
 
 private:
@@ -87,6 +88,34 @@ void tst_FileEntry::remove()
     qDebug("waitForFinished");
     future.waitForFinished();
     QVERIFY(!QFileInfo(path).exists());
+}
+
+void tst_FileEntry::rename()
+{
+    const QString fileName = "file_rename";
+    const QString newfileName = "newfile_rename";
+    const QString path = dir.path() + "/" + fileName;
+    const QString newPath = dir.path() + "/" + newfileName;
+
+    QVERIFY(!QFileInfo(path).exists());
+    QVERIFY(!QFileInfo(newPath).exists());
+    FileEntry entry(dirUrl);
+    auto future = entry.touch(fileName);
+    future.waitForFinished();
+    QVERIFY(future.result());
+    QVERIFY(QFileInfo(path).exists());
+    future = entry.rename(fileName, newfileName);
+    future.waitForFinished();
+    QVERIFY(future.result());
+    QVERIFY(!QFileInfo(path).exists());
+    QVERIFY(QFileInfo(newPath).exists());
+
+    entry = FileEntry(QUrl::fromLocalFile(newPath));
+    future = entry.rename(fileName);
+    future.waitForFinished();
+    QVERIFY(future.result());
+    QVERIFY(QFileInfo(path).exists());
+    QVERIFY(!QFileInfo(newPath).exists());
 }
 
 static void makeHierarchy(const QString &path, const QString &folderName)

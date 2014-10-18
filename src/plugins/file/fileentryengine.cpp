@@ -68,9 +68,11 @@ FileResult FileEntryEngine::remove(const QString &fileName)
 
 FileResult FileEntryEngine::rename(const QString &oldName, const QString &newName)
 {
-    const QUrl oldUrl = FileEntry::absoluteUrl(url(), oldName);
-    const QUrl newUrl = FileEntry::absoluteUrl(url(), newName);
-    bool ok = QFile::rename(oldUrl.toLocalFile(), newUrl.toLocalFile());
+    const QString oldPath = FileEntry::absoluteUrl(url(), oldName).toLocalFile();
+    const QString newPath = oldName.isEmpty()
+            ? QFileInfo(oldPath).absolutePath() + "/" + newName
+            : FileEntry::absoluteUrl(url(), newName).toLocalFile();
+    const bool ok = QFile::rename(oldPath, newPath);
     return ok ? FileResult() : FileResult::Error::Unknown;
 }
 
