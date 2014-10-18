@@ -1,7 +1,7 @@
 #ifndef ABSTRACTDIRENGINE_H
 #define ABSTRACTDIRENGINE_H
 
-#include "fileinfo.h"
+#include <QIO/FileInfo>
 
 #include <QtCore/QDir>
 #include <QtCore/QFuture>
