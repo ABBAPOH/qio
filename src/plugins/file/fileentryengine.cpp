@@ -72,8 +72,12 @@ FileResult FileEntryEngine::rename(const QString &oldName, const QString &newNam
     const QString newPath = oldName.isEmpty()
             ? QFileInfo(oldPath).absolutePath() + "/" + newName
             : FileEntry::absoluteUrl(url(), newName).toLocalFile();
-    const bool ok = QFile::rename(oldPath, newPath);
-    return ok ? FileResult() : FileResult::Error::Unknown;
+    QFile file(oldPath);
+    if (!file.exists())
+        return FileResult::Error::NoEntry;
+    if (QFileInfo(newPath).exists())
+        return FileResult::Error::Exist;
+    return file.rename(newPath) ? FileResult() : FileResult::Error::Unknown;
 }
 
 FileResult FileEntryEngine::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
