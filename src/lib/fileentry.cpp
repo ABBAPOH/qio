@@ -218,14 +218,14 @@ static bool doRemove(const FileInfo &info)
     return f.result();
 }
 
-QFuture<bool> FileEntry::removeRecursively(const QString &fileName)
+QFuture<FileResult> FileEntry::removeRecursively(const QString &fileName)
 {
-    typedef void (*func)(QFutureInterface<bool> &future, QUrl url);
-    func f = [](QFutureInterface<bool> &future, QUrl url) {
+    typedef void (*func)(QFutureInterface<FileResult> &future, QUrl url);
+    func f = [](QFutureInterface<FileResult> &future, QUrl url) {
         auto f2 = FileEntry(url).stat();
         f2.waitForFinished();
         bool ok = doRemove(f2.result());
-        future.reportResult(ok);
+        future.reportResult(ok ? FileResult() : FileResult::Error::Unknown);
     };
     return QtConcurrent::run(f, absoluteUrl(url(), fileName));
 }

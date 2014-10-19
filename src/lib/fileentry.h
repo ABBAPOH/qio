@@ -45,7 +45,7 @@ public:
 
     QFuture<FileResult> setPermissions(const QString &fileName, QFileDevice::Permissions permissions);
 
-    QFuture<bool> removeRecursively(const QString &fileName = QString());
+    QFuture<FileResult> removeRecursively(const QString &fileName = QString());
 
     static QUrl absoluteUrl(const QUrl &parentUrl, const QString &relativePath);
 
