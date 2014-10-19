@@ -27,7 +27,7 @@ public:
     QFuture<QString> list(QDir::Filters filters = QDir::NoFilter);
     QFuture<FileInfo> entryList(QDir::Filters filters = QDir::NoFilter);
 
-    QFuture<FileResult> mkdir(const QString &fileName);
+    QFuture<FileResult> mkdir(const QString &fileName = QString());
     QFuture<FileResult> rmdir(const QString &fileName = QString());
 
     QFuture<FileResult> mkpath(const QString &dirPath = QString());
@@ -46,6 +46,8 @@ public:
     QFuture<FileResult> setPermissions(const QString &fileName, QFileDevice::Permissions permissions);
 
     QFuture<FileResult> removeRecursively(const QString &fileName = QString());
+    QFuture<FileResult> copy(const QUrl &destUrl);
+    QFuture<FileResult> copy(const QString &fileName, const QUrl &destUrl);
 
     static QUrl absoluteUrl(const QUrl &parentUrl, const QString &relativePath);
 

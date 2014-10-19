@@ -230,6 +230,73 @@ QFuture<FileResult> FileEntry::removeRecursively(const QString &fileName)
     return QtConcurrent::run(f, absoluteUrl(url(), fileName));
 }
 
+static FileResult doCopy(const QUrl &sourceUrl, const QUrl &destUrl)
+{
+    FileEntry sourceEntry(sourceUrl);
+    auto statFuture = sourceEntry.stat();
+    statFuture.waitForFinished();
+    const FileInfo info = statFuture.result();
+
+    if (!info.exists())
+        return FileResult::Error::NoEntry;
+
+    if (info.isDir()) {
+        FileEntry destEntry(destUrl);
+        auto mkdirFuture = destEntry.mkdir();
+        mkdirFuture.waitForFinished();
+        if (!mkdirFuture.result())
+            return mkdirFuture.result();
+
+        static const auto filters = QDir::NoDotAndDotDot
+                | QDir::AllEntries
+                | QDir::Hidden
+                | QDir::System;
+        auto listFuture = sourceEntry.entryList(filters);
+        listFuture.waitForFinished();
+        for (int i = 0; i < listFuture.resultCount(); ++i) {
+            const FileInfo childInfo = listFuture.resultAt(i);
+            QUrl childDestUrl = destUrl;
+            childDestUrl.setPath(childDestUrl.path() + "/" + childInfo.fileName());
+            FileResult result = doCopy(childInfo.url(), childDestUrl);
+            if (!result)
+                return result;
+        }
+    } else {
+        File sourceFile(sourceUrl);
+        File destFile(destUrl);
+        if (!sourceFile.open(QIODevice::ReadOnly))
+            return FileResult::Error::Unknown;
+        if (!destFile.open(QIODevice::WriteOnly))
+            return FileResult::Error::Unknown;
+
+        while (!sourceFile.atEnd()) {
+            sourceFile.waitForReadyRead();
+            destFile.write(sourceFile.read(sourceFile.bytesAvailable()));
+            destFile.waitForBytesWritten();
+        }
+    }
+
+    return FileResult();
+}
+
+QFuture<FileResult> FileEntry::copy(const QUrl &destUrl)
+{
+    typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
+    Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
+        future.reportResult(doCopy(sourceUrl, destUrl));
+    };
+    return QtConcurrent::run(func, absoluteUrl(url(), QString()), destUrl);
+}
+
+QFuture<FileResult> FileEntry::copy(const QString &fileName, const QUrl &destUrl)
+{
+    typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
+    Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
+        future.reportResult(doCopy(sourceUrl, destUrl));
+    };
+    return QtConcurrent::run(func, absoluteUrl(url(), fileName), destUrl);
+}
+
 /*!
     Appends \a relativePath to the \a parentUrl's path and returns new url.
 */

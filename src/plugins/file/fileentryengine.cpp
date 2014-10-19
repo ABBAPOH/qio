@@ -38,14 +38,8 @@ QList<FileInfo> FileEntryEngine::entryList(QDir::Filters filters)
 
 FileResult FileEntryEngine::mkdir(const QString &dirName, bool createParents)
 {
-    QDir dir(url().toLocalFile());
-    if (!dir.exists())
-        return FileResult::Error::NoEntry;
-
-    if (dir.exists(dirName))
-        return FileResult::Error::Exist;
-
-    const bool ok = createParents ? dir.mkpath(dirName) : dir.mkdir(dirName);
+    const QString localPath = FileEntry::absoluteUrl(url(), dirName).toLocalFile();
+    const bool ok = createParents ? QDir().mkpath(localPath) : QDir().mkdir(localPath);
     if (!ok)
         return FileResult::Error::Unknown;
     return FileResult();
