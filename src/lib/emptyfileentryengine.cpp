@@ -19,12 +19,14 @@ QFuture<FileInfo> EmptyFileEntryEngine::entryList(QDir::Filters filters)
 QFuture<FileResult> EmptyFileEntryEngine::mkdir(const QString &fileName, bool createParents)
 {
     Q_UNUSED(fileName);
+    Q_UNUSED(createParents);
     return QFuture<FileResult>();
 }
 
 QFuture<FileResult> EmptyFileEntryEngine::rmdir(const QString &fileName, bool removeEmptyParents)
 {
     Q_UNUSED(fileName);
+    Q_UNUSED(removeEmptyParents);
     return QFuture<FileResult>();
 }
 

@@ -219,7 +219,7 @@ void FileEngineWin::readCallback(DWORD errorCode, DWORD numberOfBytesTransfered,
             return;
     }
     engine->activeOverlapped.swap(engine->inactiveOverlapped);
-    if (numberOfBytesTransfered != engine->readBuffer.size())
+    if (numberOfBytesTransfered != static_cast<uint>(engine->readBuffer.size()))
         numberOfBytesTransfered = 0;
     engine->readFinished(engine->readBuffer.data(), numberOfBytesTransfered);
     qDebug() << "readCallback finished";
