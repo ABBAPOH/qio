@@ -159,6 +159,38 @@ void tst_FileEntry::removeRecursively()
     QVERIFY(!QFileInfo(path).exists());
 }
 
+static bool compareInfos(const FileInfo &lhs, const FileInfo &rhs)
+{
+    return lhs.isDir() == rhs.isDir() && lhs.fileName() == rhs.fileName();
+}
+
+static bool compareDirectories(const QUrl &lhs, const QUrl &rhs)
+{
+    FileEntry leftEntry(lhs);
+    FileEntry rigthEntry(rhs);
+
+    auto f3 = leftEntry.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
+    auto f4 = rigthEntry.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
+    f3.waitForFinished();
+    f4.waitForFinished();
+
+    if (f3.resultCount() != f4.resultCount())
+        return false;
+
+    for (int i = 0; i < f3.resultCount(); ++i) {
+        FileInfo info1 = f3.resultAt(i);
+        FileInfo info2 = f4.resultAt(i);
+        if (!compareInfos(info1, info2))
+            return false;
+        if (info1.isDir()) {
+            if (!compareDirectories(info1.url(), info2.url()))
+                return false;
+        }
+    }
+
+    return true;
+}
+
 void tst_FileEntry::copy()
 {
     const QString folderName = "folder_copy";
@@ -171,6 +203,7 @@ void tst_FileEntry::copy()
     auto future = FileEntry(QUrl::fromLocalFile(path)).copy(QUrl::fromLocalFile(destPath));
     future.waitForFinished();
     QVERIFY(future.result());
+    QVERIFY(compareDirectories(QUrl::fromLocalFile(path), QUrl::fromLocalFile(destPath)));
 }
 
 QTEST_MAIN(tst_FileEntry)
