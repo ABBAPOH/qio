@@ -297,6 +297,36 @@ QFuture<FileResult> FileEntry::copy(const QString &fileName, const QUrl &destUrl
     return QtConcurrent::run(func, absoluteUrl(url(), fileName), destUrl);
 }
 
+static FileResult doMove(const QUrl &sourceUrl, const QUrl &destUrl)
+{
+    FileResult result = doCopy(sourceUrl, destUrl);
+    if (!result)
+        return result;
+
+    auto f2 = FileEntry(sourceUrl).stat();
+    f2.waitForFinished();
+    bool ok = doRemove(f2.result());
+    return ok ? FileResult() : FileResult::Error::Unknown;
+}
+
+QFuture<FileResult> FileEntry::move(const QUrl &destUrl)
+{
+    typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
+    Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
+        future.reportResult(doMove(sourceUrl, destUrl));
+    };
+    return QtConcurrent::run(func, absoluteUrl(url(), QString()), destUrl);
+}
+
+QFuture<FileResult> FileEntry::move(const QString &fileName, const QUrl &destUrl)
+{
+    typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
+    Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
+        future.reportResult(doMove(sourceUrl, destUrl));
+    };
+    return QtConcurrent::run(func, absoluteUrl(url(), fileName), destUrl);
+}
+
 /*!
     Appends \a relativePath to the \a parentUrl's path and returns new url.
 */

@@ -17,6 +17,7 @@ private slots:
     void rename();
     void removeRecursively();
     void copy();
+    void move();
 
 private:
     QTemporaryDir dir;
@@ -204,6 +205,26 @@ void tst_FileEntry::copy()
     future.waitForFinished();
     QVERIFY(future.result());
     QVERIFY(compareDirectories(QUrl::fromLocalFile(path), QUrl::fromLocalFile(destPath)));
+}
+
+void tst_FileEntry::move()
+{
+    const QString folderName = "folder_move";
+    const QString path = dir.path() + "/" + folderName;
+    const QString testFolderName = "testfolder_move";
+    const QString testFolderPath = dir.path() + "/" + testFolderName;
+    const QString destPath = dir.path() + "/" + "folder2_move";
+    QVERIFY(!QFileInfo(path).exists());
+    makeHierarchy(dir.path(), folderName);
+    makeHierarchy(dir.path(), testFolderName);
+    QVERIFY(QFileInfo(path).exists());
+
+    auto future = FileEntry(QUrl::fromLocalFile(path)).move(QUrl::fromLocalFile(destPath));
+    future.waitForFinished();
+    QVERIFY(future.result());
+    QVERIFY(!QFileInfo(path).exists());
+    QVERIFY(QFileInfo(destPath).exists());
+    QVERIFY(compareDirectories(QUrl::fromLocalFile(testFolderPath), QUrl::fromLocalFile(destPath)));
 }
 
 QTEST_MAIN(tst_FileEntry)

@@ -48,6 +48,8 @@ public:
     QFuture<FileResult> removeRecursively(const QString &fileName = QString());
     QFuture<FileResult> copy(const QUrl &destUrl);
     QFuture<FileResult> copy(const QString &fileName, const QUrl &destUrl);
+    QFuture<FileResult> move(const QUrl &destUrl);
+    QFuture<FileResult> move(const QString &fileName, const QUrl &destUrl);
 
     static QUrl absoluteUrl(const QUrl &parentUrl, const QString &relativePath);
 
