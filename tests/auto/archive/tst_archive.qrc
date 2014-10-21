@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>plain.zip</file>
+        <file>empty.zip</file>
+    </qresource>
+</RCC>
