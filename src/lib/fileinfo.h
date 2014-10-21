@@ -39,6 +39,8 @@ private:
     QSharedDataPointer<FileInfoData> d;
 };
 
+typedef QList<FileInfo> FileInfoList;
+
 inline bool operator ==(const FileInfo &lhs, const FileInfo &rhs)
 {
     return lhs.url() == rhs.url();
