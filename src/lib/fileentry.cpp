@@ -48,16 +48,6 @@ static inline QString getAbsolutePath(const QUrl &url)
     return QFileInfo(url.path()).absolutePath();
 }
 
-static inline QUrl getAbsoluteUrl(const QUrl &url)
-{
-    return QUrl::fromLocalFile(getAbsolutePath(url));
-}
-
-static inline QString getFileName(const QUrl &url)
-{
-    return QFileInfo(url.path()).fileName();
-}
-
 FileEntry::FileEntry() :
     d(new FileEntryData)
 {

@@ -15,6 +15,7 @@ QStringList ArchivePlugin::schemes() const
 
 AbstractFileEngine *ArchivePlugin::createFileEngine(const QString &scheme) const
 {
+    Q_UNUSED(scheme);
     return Q_NULLPTR;
 }
 

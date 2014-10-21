@@ -38,6 +38,7 @@ void ArchiveEntryEngine::setUrl(const QUrl &url)
 
 QStringList ArchiveEntryEngine::list(QDir::Filters filters)
 {
+    Q_UNUSED(filters);
     const KArchiveDirectory *dir = getDirectory(m_archive.data(), m_relativePath);
     if (!dir)
         return QStringList();
@@ -60,16 +61,23 @@ QList<FileInfo> ArchiveEntryEngine::entryList(QDir::Filters filters)
 
 FileResult ArchiveEntryEngine::mkdir(const QString &fileName, bool createParents)
 {
+    Q_UNUSED(fileName);
+    Q_UNUSED(createParents);
+    Q_UNIMPLEMENTED();
     return FileResult::Error::NotImplemented;
 }
 
 FileResult ArchiveEntryEngine::rmdir(const QString &fileName, bool removeEmptyParents)
 {
+    Q_UNUSED(fileName);
+    Q_UNUSED(removeEmptyParents);
+    Q_UNIMPLEMENTED();
     return FileResult::Error::NotImplemented;
 }
 
 FileResult ArchiveEntryEngine::remove(const QString &fileName)
 {
+    Q_UNUSED(fileName);
     return FileResult::Error::NotImplemented;
 }
 
