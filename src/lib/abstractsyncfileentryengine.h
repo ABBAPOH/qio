@@ -19,8 +19,8 @@ public:
     // TODO: use iterator
     virtual QStringList list(QDir::Filters filters) = 0;
     virtual QList<FileInfo> entryList(QDir::Filters filters) = 0;
-    virtual FileResult mkdir(const QString &fileName, bool createParents) = 0;
-    virtual FileResult rmdir(const QString &fileName, bool removeEmptyParents) = 0;
+    virtual FileResult mkdir(const QString &dirName, bool createParents) = 0;
+    virtual FileResult rmdir(const QString &dirName, bool removeEmptyParents) = 0;
     virtual FileResult remove(const QString &fileName) = 0;
     virtual FileResult rename(const QString &oldName, const QString &newName) = 0;
     virtual FileResult setPermissions(const QString &fileName, QFile::Permissions permissions) = 0;

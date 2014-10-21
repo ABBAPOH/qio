@@ -59,17 +59,17 @@ QList<FileInfo> ArchiveEntryEngine::entryList(QDir::Filters filters)
     return result;
 }
 
-FileResult ArchiveEntryEngine::mkdir(const QString &fileName, bool createParents)
+FileResult ArchiveEntryEngine::mkdir(const QString &dirName, bool createParents)
 {
-    Q_UNUSED(fileName);
+    Q_UNUSED(dirName);
     Q_UNUSED(createParents);
     Q_UNIMPLEMENTED();
     return FileResult::Error::NotImplemented;
 }
 
-FileResult ArchiveEntryEngine::rmdir(const QString &fileName, bool removeEmptyParents)
+FileResult ArchiveEntryEngine::rmdir(const QString &dirName, bool removeEmptyParents)
 {
-    Q_UNUSED(fileName);
+    Q_UNUSED(dirName);
     Q_UNUSED(removeEmptyParents);
     Q_UNIMPLEMENTED();
     return FileResult::Error::NotImplemented;
