@@ -22,30 +22,24 @@ SyncDirEngineWrapper::SyncDirEngineWrapper(AbstractSyncFileEntryEngine *engine) 
 {
 }
 
-QFuture<QString> SyncDirEngineWrapper::list(QDir::Filters filters)
+QFuture<QStringList> SyncDirEngineWrapper::list(QDir::Filters filters)
 {
-    typedef void (*Func)(QFutureInterface<QString> &, FileOperation, QDir::Filters);
-    Func f = [](QFutureInterface<QString> &future, FileOperation op, QDir::Filters filters) {
+    typedef void (*Func)(QFutureInterface<QStringList> &, FileOperation, QDir::Filters);
+    Func f = [](QFutureInterface<QStringList> &future, FileOperation op, QDir::Filters filters) {
         QMutexLocker l(&op.state->mutex);
         op.state->engine->setUrl(op.url);
-        const QStringList list = op.state->engine->list(filters);
-        foreach (const QString &fileName, list) {
-            future.reportResult(fileName);
-        }
+        future.reportResult(op.state->engine->list(filters));
     };
     return QtConcurrent::run(f, FileOperation(m_state, url()), filters);
 }
 
-QFuture<FileInfo> SyncDirEngineWrapper::entryList(QDir::Filters filters)
+QFuture<FileInfoList> SyncDirEngineWrapper::entryList(QDir::Filters filters)
 {
-    typedef void (*Func)(QFutureInterface<FileInfo> &, FileOperation, QDir::Filters);
-    Func f = [](QFutureInterface<FileInfo> &future, FileOperation op, QDir::Filters filters) {
+    typedef void (*Func)(QFutureInterface<FileInfoList> &, FileOperation, QDir::Filters);
+    Func f = [](QFutureInterface<FileInfoList> &future, FileOperation op, QDir::Filters filters) {
         QMutexLocker l(&op.state->mutex);
         op.state->engine->setUrl(op.url);
-        const QList<FileInfo> list = op.state->engine->entryList(filters);
-        foreach (const FileInfo &fileInfo, list) {
-            future.reportResult(fileInfo);
-        }
+        future.reportResult(op.state->engine->entryList(filters));
     };
     return QtConcurrent::run(f, FileOperation(m_state, url()), filters);
 }

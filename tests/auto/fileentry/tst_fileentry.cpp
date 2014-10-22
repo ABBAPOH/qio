@@ -170,21 +170,24 @@ static bool compareDirectories(const QUrl &lhs, const QUrl &rhs)
     FileEntry leftEntry(lhs);
     FileEntry rigthEntry(rhs);
 
-    auto f3 = leftEntry.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
-    auto f4 = rigthEntry.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
-    f3.waitForFinished();
-    f4.waitForFinished();
+    auto leftFuture = leftEntry.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
+    auto rightFuture = rigthEntry.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
+    leftFuture.waitForFinished();
+    rightFuture.waitForFinished();
 
-    if (f3.resultCount() != f4.resultCount())
+    const FileInfoList leftList = leftFuture.result();
+    const FileInfoList rightList = rightFuture.result();
+
+    if (leftList.count() != rightList.count())
         return false;
 
-    for (int i = 0; i < f3.resultCount(); ++i) {
-        FileInfo info1 = f3.resultAt(i);
-        FileInfo info2 = f4.resultAt(i);
-        if (!compareInfos(info1, info2))
+    for (int i = 0; i < leftList.count(); ++i) {
+        const FileInfo leftInfo = leftList.at(i);
+        const FileInfo rightInfo = rightList.at(i);
+        if (!compareInfos(leftInfo, rightInfo))
             return false;
-        if (info1.isDir()) {
-            if (!compareDirectories(info1.url(), info2.url()))
+        if (leftInfo.isDir()) {
+            if (!compareDirectories(leftInfo.url(), rightInfo.url()))
                 return false;
         }
     }

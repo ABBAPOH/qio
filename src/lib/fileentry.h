@@ -24,8 +24,8 @@ public:
     QUrl url() const;
     void setUrl(const QUrl &url);
 
-    QFuture<QString> list(QDir::Filters filters = QDir::NoFilter);
-    QFuture<FileInfo> entryList(QDir::Filters filters = QDir::NoFilter);
+    QFuture<QStringList> list(QDir::Filters filters = QDir::NoFilter);
+    QFuture<FileInfoList> entryList(QDir::Filters filters = QDir::NoFilter);
 
     QFuture<FileResult> mkdir(const QString &fileName = QString());
     QFuture<FileResult> rmdir(const QString &fileName = QString());

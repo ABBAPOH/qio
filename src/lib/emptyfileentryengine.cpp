@@ -4,16 +4,16 @@ EmptyFileEntryEngine::EmptyFileEntryEngine()
 {
 }
 
-QFuture<QString> EmptyFileEntryEngine::list(QDir::Filters filters)
+QFuture<QStringList> EmptyFileEntryEngine::list(QDir::Filters filters)
 {
     Q_UNUSED(filters);
-    return QFuture<QString>();
+    return QFuture<QStringList>();
 }
 
-QFuture<FileInfo> EmptyFileEntryEngine::entryList(QDir::Filters filters)
+QFuture<FileInfoList> EmptyFileEntryEngine::entryList(QDir::Filters filters)
 {
     Q_UNUSED(filters);
-    return QFuture<FileInfo>();
+    return QFuture<FileInfoList>();
 }
 
 QFuture<FileResult> EmptyFileEntryEngine::mkdir(const QString &fileName, bool createParents)

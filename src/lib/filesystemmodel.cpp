@@ -179,7 +179,7 @@ void FileSystemModel::refresh(const QModelIndex &index)
 
     const QUrl url = item == d->root ? d->rootUrl : item->info.url();
     qDebug() << "fetchMore" << url << item->state;
-    QFutureWatcher<FileInfo> *watcher = new QFutureWatcher<FileInfo>(this);
+    QFutureWatcher<FileInfoList> *watcher = new QFutureWatcher<FileInfoList>(this);
     watcher->setProperty("url", url);
     connect(watcher, &QFutureWatcherBase::finished, this, &FileSystemModel::onFinished);
 
@@ -205,8 +205,8 @@ void FileSystemModel::onFinished()
 {
     Q_D(FileSystemModel);
 
-    QFutureWatcher<FileInfo> *watcher = static_cast< QFutureWatcher<FileInfo> *>(sender());
-    QFuture<FileInfo> future = watcher->future();
+    QFutureWatcher<FileInfoList> *watcher = static_cast< QFutureWatcher<FileInfoList> *>(sender());
+    QFuture<FileInfoList> future = watcher->future();
     if (future.isCanceled())
         return;
 
@@ -223,10 +223,9 @@ void FileSystemModel::onFinished()
     }
 
     QSet<FileInfo> newSet;
-    const int count = future.resultCount();
-    for (int i = 0; i < count; ++i) {
-        newSet.insert(future.resultAt(i));
-    }
+    const int count = future.result().count();
+    foreach (const FileInfo &info, future.result())
+        newSet.insert(info);
 
     QSet<FileInfo> toInsert = newSet;
     toInsert.subtract(oldSet);

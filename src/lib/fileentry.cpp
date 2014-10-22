@@ -94,12 +94,12 @@ void FileEntry::setUrl(const QUrl &url)
     d->url = url;
 }
 
-QFuture<QString> FileEntry::list(QDir::Filters filters)
+QFuture<QStringList> FileEntry::list(QDir::Filters filters)
 {
     return d->engine->list(filters);
 }
 
-QFuture<FileInfo> FileEntry::entryList(QDir::Filters filters)
+QFuture<FileInfoList> FileEntry::entryList(QDir::Filters filters)
 {
     return d->engine->entryList(filters);
 }
@@ -191,9 +191,11 @@ static bool doRemove(const FileInfo &info)
         auto f1 = dir.entryList(filters);
         // TODO: wait for next result
         f1.waitForFinished();
+        FileInfoList list = f1.result();
         bool ok = true;
-        for (int i = 0; i < f1.resultCount(); ++i)
-            ok &= doRemove(f1.resultAt(i));
+
+        foreach (const auto &info, list)
+            ok &= doRemove(info);
 
         if (!ok)
             return false;
@@ -243,8 +245,8 @@ static FileResult doCopy(const QUrl &sourceUrl, const QUrl &destUrl)
                 | QDir::System;
         auto listFuture = sourceEntry.entryList(filters);
         listFuture.waitForFinished();
-        for (int i = 0; i < listFuture.resultCount(); ++i) {
-            const FileInfo childInfo = listFuture.resultAt(i);
+        const FileInfoList list = listFuture.result();
+        foreach (const FileInfo &childInfo, list) {
             QUrl childDestUrl = destUrl;
             childDestUrl.setPath(childDestUrl.path() + "/" + childInfo.fileName());
             FileResult result = doCopy(childInfo.url(), childDestUrl);
