@@ -16,9 +16,8 @@ public:
     QFuture<FileResult> remove(const QString &fileName) Q_DECL_OVERRIDE;
     QFuture<FileResult> rename(const QString &oldName, const QString &newName) Q_DECL_OVERRIDE;
     QFuture<FileResult> setPermissions(const QString &fileName,
-                                 QFileDevice::Permissions permissions) Q_DECL_OVERRIDE;
+                                       QFileDevice::Permissions permissions) Q_DECL_OVERRIDE;
     QFuture<FileInfo> stat(const QString &fileName) Q_DECL_OVERRIDE;
 };
-
 
 #endif // EMPTYFILEENTRYENGINE_H

@@ -11,7 +11,8 @@ QFuture<QStringList> EmptyFileEntryEngine::list(QDir::Filters filters, QDir::Sor
     return QFuture<QStringList>();
 }
 
-QFuture<FileInfoList> EmptyFileEntryEngine::infoList(QDir::Filters filters, QDir::SortFlags sortFlags)
+QFuture<FileInfoList> EmptyFileEntryEngine::infoList(QDir::Filters filters,
+                                                     QDir::SortFlags sortFlags)
 {
     Q_UNUSED(filters);
     Q_UNUSED(sortFlags);
@@ -46,7 +47,7 @@ QFuture<FileResult> EmptyFileEntryEngine::rename(const QString &oldName, const Q
 }
 
 QFuture<FileResult> EmptyFileEntryEngine::setPermissions(const QString &fileName,
-                                             QFileDevice::Permissions permissions)
+                                                         QFileDevice::Permissions permissions)
 {
     Q_UNUSED(fileName);
     Q_UNUSED(permissions);
