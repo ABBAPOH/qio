@@ -94,14 +94,14 @@ void FileEntry::setUrl(const QUrl &url)
     d->url = url;
 }
 
-QFuture<QStringList> FileEntry::list(QDir::Filters filters)
+QFuture<QStringList> FileEntry::list(QDir::Filters filters, QDir::SortFlags sortFlags)
 {
-    return d->engine->list(filters);
+    return d->engine->list(filters, sortFlags);
 }
 
-QFuture<FileInfoList> FileEntry::entryList(QDir::Filters filters)
+QFuture<FileInfoList> FileEntry::entryList(QDir::Filters filters, QDir::SortFlags sortFlags)
 {
-    return d->engine->entryList(filters);
+    return d->engine->entryList(filters, sortFlags);
 }
 
 QFuture<FileResult> FileEntry::mkdir(const QString &fileName)

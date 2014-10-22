@@ -36,15 +36,6 @@ void ArchiveEntryEngine::setUrl(const QUrl &url)
     }
 }
 
-QStringList ArchiveEntryEngine::list(QDir::Filters filters)
-{
-    Q_UNUSED(filters);
-    const KArchiveDirectory *dir = getDirectory(m_archive.data(), m_relativePath);
-    if (!dir)
-        return QStringList();
-    return dir->entries();
-}
-
 QList<FileInfo> ArchiveEntryEngine::entryList(QDir::Filters filters)
 {
     QList<FileInfo> result;
@@ -52,7 +43,7 @@ QList<FileInfo> ArchiveEntryEngine::entryList(QDir::Filters filters)
     if (!dir)
         return result;
 
-    foreach (const QString &name, list(filters)) {
+    foreach (const QString &name, dir->entries()) {
         const KArchiveEntry *entry = dir->entry(name);
         result.append(fromEntry(entry, name));
     }

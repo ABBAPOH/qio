@@ -61,14 +61,9 @@ void tst_Archive::list()
     QVERIFY(::copyFile(":/" + fileName, filePath));
 
     FileEntry entry(QString("zip://%1").arg(filePath));
-    auto future = entry.list();
+    auto future = entry.list(QDir::NoDotAndDotDot | QDir::AllEntries, QDir::Name);
     future.waitForFinished();
-    QStringList lst;
-    for (int i = 0; i < future.resultCount(); ++i) {
-        lst.append(future.resultAt(i));
-    }
-    std::sort(lst.begin(), lst.end());
-    QCOMPARE(lst, list);
+    QCOMPARE(future.result(), list);
 }
 
 QTEST_MAIN(tst_Archive)

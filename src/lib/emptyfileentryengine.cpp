@@ -4,15 +4,17 @@ EmptyFileEntryEngine::EmptyFileEntryEngine()
 {
 }
 
-QFuture<QStringList> EmptyFileEntryEngine::list(QDir::Filters filters)
+QFuture<QStringList> EmptyFileEntryEngine::list(QDir::Filters filters, QDir::SortFlags sortFlags)
 {
     Q_UNUSED(filters);
+    Q_UNUSED(sortFlags);
     return QFuture<QStringList>();
 }
 
-QFuture<FileInfoList> EmptyFileEntryEngine::entryList(QDir::Filters filters)
+QFuture<FileInfoList> EmptyFileEntryEngine::entryList(QDir::Filters filters, QDir::SortFlags sortFlags)
 {
     Q_UNUSED(filters);
+    Q_UNUSED(sortFlags);
     return QFuture<FileInfoList>();
 }
 

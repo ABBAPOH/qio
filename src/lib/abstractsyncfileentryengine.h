@@ -17,7 +17,6 @@ public:
     virtual void setUrl(const QUrl &url);
 
     // TODO: use iterator
-    virtual QStringList list(QDir::Filters filters) = 0;
     virtual QList<FileInfo> entryList(QDir::Filters filters) = 0;
     virtual FileResult mkdir(const QString &dirName, bool createParents) = 0;
     virtual FileResult rmdir(const QString &dirName, bool removeEmptyParents) = 0;

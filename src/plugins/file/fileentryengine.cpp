@@ -21,11 +21,6 @@ static FileInfo fromQFileInfo(const QFileInfo &info)
     return FileInfo(d);
 }
 
-QStringList FileEntryEngine::list(QDir::Filters filters)
-{
-    return QDir(url().toLocalFile()).entryList(filters);
-}
-
 QList<FileInfo> FileEntryEngine::entryList(QDir::Filters filters)
 {
     QList<FileInfo> result;

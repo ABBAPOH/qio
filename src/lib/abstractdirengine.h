@@ -17,8 +17,8 @@ public:
     QUrl url() const;
     virtual void setUrl(const QUrl &url);
 
-    virtual QFuture<QStringList> list(QDir::Filters filters) = 0;
-    virtual QFuture<FileInfoList> entryList(QDir::Filters filters) = 0;
+    virtual QFuture<QStringList> list(QDir::Filters filters, QDir::SortFlags sortFlags) = 0;
+    virtual QFuture<FileInfoList> entryList(QDir::Filters filters, QDir::SortFlags sortFlags) = 0;
     virtual QFuture<FileResult> mkdir(const QString &dirName, bool createParents) = 0;
     virtual QFuture<FileResult> rmdir(const QString &dirName, bool removeEmptyParents) = 0;
     virtual QFuture<FileResult> remove(const QString &fileName) = 0;
