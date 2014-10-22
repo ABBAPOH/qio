@@ -11,7 +11,7 @@ QFuture<QStringList> EmptyFileEntryEngine::list(QDir::Filters filters, QDir::Sor
     return QFuture<QStringList>();
 }
 
-QFuture<FileInfoList> EmptyFileEntryEngine::entryList(QDir::Filters filters, QDir::SortFlags sortFlags)
+QFuture<FileInfoList> EmptyFileEntryEngine::infoList(QDir::Filters filters, QDir::SortFlags sortFlags)
 {
     Q_UNUSED(filters);
     Q_UNUSED(sortFlags);

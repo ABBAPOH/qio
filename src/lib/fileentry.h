@@ -26,8 +26,8 @@ public:
 
     QFuture<QStringList> list(QDir::Filters filters = QDir::NoFilter,
                               QDir::SortFlags sortFlags = QDir::NoSort);
-    QFuture<FileInfoList> entryList(QDir::Filters filters = QDir::NoFilter,
-                                    QDir::SortFlags sortFlags = QDir::NoSort);
+    QFuture<FileInfoList> infoList(QDir::Filters filters = QDir::NoFilter,
+                                   QDir::SortFlags sortFlags = QDir::NoSort);
 
     QFuture<FileResult> mkdir(const QString &fileName = QString());
     QFuture<FileResult> rmdir(const QString &fileName = QString());

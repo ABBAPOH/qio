@@ -99,9 +99,9 @@ QFuture<QStringList> FileEntry::list(QDir::Filters filters, QDir::SortFlags sort
     return d->engine->list(filters, sortFlags);
 }
 
-QFuture<FileInfoList> FileEntry::entryList(QDir::Filters filters, QDir::SortFlags sortFlags)
+QFuture<FileInfoList> FileEntry::infoList(QDir::Filters filters, QDir::SortFlags sortFlags)
 {
-    return d->engine->entryList(filters, sortFlags);
+    return d->engine->infoList(filters, sortFlags);
 }
 
 QFuture<FileResult> FileEntry::mkdir(const QString &fileName)
@@ -188,7 +188,7 @@ static bool doRemove(const FileInfo &info)
                 | QDir::System;
         const QUrl url = info.url();
         FileEntry dir(url);
-        auto f1 = dir.entryList(filters);
+        auto f1 = dir.infoList(filters);
         // TODO: wait for next result
         f1.waitForFinished();
         FileInfoList list = f1.result();
@@ -243,7 +243,7 @@ static FileResult doCopy(const QUrl &sourceUrl, const QUrl &destUrl)
                 | QDir::AllEntries
                 | QDir::Hidden
                 | QDir::System;
-        auto listFuture = sourceEntry.entryList(filters);
+        auto listFuture = sourceEntry.infoList(filters);
         listFuture.waitForFinished();
         const FileInfoList list = listFuture.result();
         foreach (const FileInfo &childInfo, list) {

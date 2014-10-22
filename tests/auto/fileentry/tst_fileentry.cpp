@@ -170,8 +170,8 @@ static bool compareDirectories(const QUrl &lhs, const QUrl &rhs)
     FileEntry leftEntry(lhs);
     FileEntry rigthEntry(rhs);
 
-    auto leftFuture = leftEntry.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
-    auto rightFuture = rigthEntry.entryList(QDir::NoDotAndDotDot | QDir::AllEntries);
+    auto leftFuture = leftEntry.infoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+    auto rightFuture = rigthEntry.infoList(QDir::NoDotAndDotDot | QDir::AllEntries);
     leftFuture.waitForFinished();
     rightFuture.waitForFinished();
 

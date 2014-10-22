@@ -120,8 +120,8 @@ QFuture<QStringList> SyncDirEngineWrapper::list(QDir::Filters filters, QDir::Sor
     return QtConcurrent::run(f, FileOperation(m_state, url()), filters, sortFlags);
 }
 
-QFuture<FileInfoList> SyncDirEngineWrapper::entryList(QDir::Filters filters,
-                                                      QDir::SortFlags sortFlags)
+QFuture<FileInfoList> SyncDirEngineWrapper::infoList(QDir::Filters filters,
+                                                     QDir::SortFlags sortFlags)
 {
     typedef void (*Func)(QFutureInterface<FileInfoList> &,
                          FileOperation,

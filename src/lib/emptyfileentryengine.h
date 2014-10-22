@@ -9,8 +9,8 @@ public:
     EmptyFileEntryEngine();
 
     QFuture<QStringList> list(QDir::Filters filters, QDir::SortFlags sortFlags) Q_DECL_OVERRIDE;
-    QFuture<FileInfoList> entryList(QDir::Filters filters,
-                                    QDir::SortFlags sortFlags) Q_DECL_OVERRIDE;
+    QFuture<FileInfoList> infoList(QDir::Filters filters,
+                                   QDir::SortFlags sortFlags) Q_DECL_OVERRIDE;
     QFuture<FileResult> mkdir(const QString &fileName, bool createParents) Q_DECL_OVERRIDE;
     QFuture<FileResult> rmdir(const QString &fileName, bool removeEmptyParents) Q_DECL_OVERRIDE;
     QFuture<FileResult> remove(const QString &fileName) Q_DECL_OVERRIDE;
