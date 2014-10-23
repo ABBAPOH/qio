@@ -43,11 +43,6 @@ void FileEntryData::destroyEngine(AbstractDirEngine *engine)
         delete engine;
 }
 
-static inline QString getAbsolutePath(const QUrl &url)
-{
-    return QFileInfo(url.path()).absolutePath();
-}
-
 FileEntry::FileEntry() :
     d(new FileEntryData)
 {
