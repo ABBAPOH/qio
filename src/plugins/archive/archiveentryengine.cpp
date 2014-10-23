@@ -36,9 +36,9 @@ void ArchiveEntryEngine::setUrl(const QUrl &url)
     }
 }
 
-QList<FileInfo> ArchiveEntryEngine::entryList(QDir::Filters filters)
+FileInfoList ArchiveEntryEngine::entryList(QDir::Filters filters)
 {
-    QList<FileInfo> result;
+    FileInfoList result;
     const KArchiveDirectory *dir = getDirectory(m_archive.data(), m_relativePath);
     if (!dir)
         return result;

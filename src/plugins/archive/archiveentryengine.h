@@ -11,7 +11,7 @@ public:
 
     void setUrl(const QUrl &url);
 
-    QList<FileInfo> entryList(QDir::Filters filters) Q_DECL_OVERRIDE;
+    FileInfoList entryList(QDir::Filters filters) Q_DECL_OVERRIDE;
     FileResult mkdir(const QString &dirName, bool createParents) Q_DECL_OVERRIDE;
     FileResult rmdir(const QString &dirName, bool removeEmptyParents) Q_DECL_OVERRIDE;
     FileResult remove(const QString &fileName) Q_DECL_OVERRIDE;
