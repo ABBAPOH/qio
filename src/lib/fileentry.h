@@ -3,6 +3,7 @@
 
 #include <QIO/FileInfo>
 #include <QIO/FileResult>
+#include <QIO/Jobs>
 
 #include <QtCore/QDir>
 #include <QtCore/QFuture>
@@ -24,34 +25,33 @@ public:
     QUrl url() const;
     void setUrl(const QUrl &url);
 
-    QFuture<QStringList> list(QDir::Filters filters = QDir::NoFilter,
-                              QDir::SortFlags sortFlags = QDir::NoSort);
-    QFuture<FileInfoList> infoList(QDir::Filters filters = QDir::NoFilter,
-                                   QDir::SortFlags sortFlags = QDir::NoSort);
+    ListJob list(QDir::Filters filters = QDir::NoFilter, QDir::SortFlags sortFlags = QDir::NoSort);
+    InfoListJob infoList(QDir::Filters filters = QDir::NoFilter,
+                         QDir::SortFlags sortFlags = QDir::NoSort);
 
-    QFuture<FileResult> mkdir(const QString &fileName = QString());
-    QFuture<FileResult> rmdir(const QString &fileName = QString());
+    FileJob mkdir(const QString &fileName = QString());
+    FileJob rmdir(const QString &fileName = QString());
 
-    QFuture<FileResult> mkpath(const QString &dirPath = QString());
-    QFuture<FileResult> rmpath(const QString &dirPath = QString());
+    FileJob mkpath(const QString &dirPath = QString());
+    FileJob rmpath(const QString &dirPath = QString());
 
-    QFuture<FileResult> touch(const QString &fileName = QString());
-    QFuture<FileResult> remove(const QString &fileName = QString());
+    FileJob touch(const QString &fileName = QString());
+    FileJob remove(const QString &fileName = QString());
 
-    QFuture<FileResult> rename(const QString &newName);
-    QFuture<FileResult> rename(const QString &oldName, const QString &newName);
+    FileJob rename(const QString &newName);
+    FileJob rename(const QString &oldName, const QString &newName);
 
-    QFuture<FileResult> link(const QString &linkPath);
+    FileJob link(const QString &linkPath);
 
-    QFuture<FileInfo> stat(const QString &fileName = QString());
+    StatJob stat(const QString &fileName = QString());
 
-    QFuture<FileResult> setPermissions(const QString &fileName, QFileDevice::Permissions permissions);
+    FileJob setPermissions(const QString &fileName, QFileDevice::Permissions permissions);
 
-    QFuture<FileResult> removeRecursively(const QString &fileName = QString());
-    QFuture<FileResult> copy(const QUrl &destUrl);
-    QFuture<FileResult> copy(const QString &fileName, const QUrl &destUrl);
-    QFuture<FileResult> move(const QUrl &destUrl);
-    QFuture<FileResult> move(const QString &fileName, const QUrl &destUrl);
+    FileJob removeRecursively(const QString &fileName = QString());
+    FileJob copy(const QUrl &destUrl);
+    FileJob copy(const QString &fileName, const QUrl &destUrl);
+    FileJob move(const QUrl &destUrl);
+    FileJob move(const QString &fileName, const QUrl &destUrl);
 
     static QUrl absoluteUrl(const QUrl &parentUrl, const QString &relativePath);
 

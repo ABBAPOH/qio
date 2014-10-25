@@ -3,6 +3,7 @@
 
 #include <QIO/FileInfo>
 #include <QIO/FileResult>
+#include <QIO/Jobs>
 
 #include <QtCore/QDir>
 #include <QtCore/QFuture>
@@ -17,15 +18,15 @@ public:
     QUrl url() const;
     virtual void setUrl(const QUrl &url);
 
-    virtual QFuture<QStringList> list(QDir::Filters filters, QDir::SortFlags sortFlags) = 0;
-    virtual QFuture<FileInfoList> infoList(QDir::Filters filters, QDir::SortFlags sortFlags) = 0;
-    virtual QFuture<FileResult> mkdir(const QString &dirName, bool createParents) = 0;
-    virtual QFuture<FileResult> rmdir(const QString &dirName, bool removeEmptyParents) = 0;
-    virtual QFuture<FileResult> remove(const QString &fileName) = 0;
-    virtual QFuture<FileResult> rename(const QString &oldName, const QString &newName) = 0;
-    virtual QFuture<FileResult> setPermissions(const QString &fileName,
+    virtual ListJob list(QDir::Filters filters, QDir::SortFlags sortFlags) = 0;
+    virtual InfoListJob infoList(QDir::Filters filters, QDir::SortFlags sortFlags) = 0;
+    virtual FileJob mkdir(const QString &dirName, bool createParents) = 0;
+    virtual FileJob rmdir(const QString &dirName, bool removeEmptyParents) = 0;
+    virtual FileJob remove(const QString &fileName) = 0;
+    virtual FileJob rename(const QString &oldName, const QString &newName) = 0;
+    virtual FileJob setPermissions(const QString &fileName,
                                          QFileDevice::Permissions permissions) = 0;
-    virtual QFuture<FileInfo> stat(const QString &fileName) = 0;
+    virtual StatJob stat(const QString &fileName) = 0;
 
     static AbstractDirEngine *emptyEngine();
 

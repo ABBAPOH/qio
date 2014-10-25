@@ -89,37 +89,37 @@ void FileEntry::setUrl(const QUrl &url)
     d->url = url;
 }
 
-QFuture<QStringList> FileEntry::list(QDir::Filters filters, QDir::SortFlags sortFlags)
+ListJob FileEntry::list(QDir::Filters filters, QDir::SortFlags sortFlags)
 {
     return d->engine->list(filters, sortFlags);
 }
 
-QFuture<FileInfoList> FileEntry::infoList(QDir::Filters filters, QDir::SortFlags sortFlags)
+InfoListJob FileEntry::infoList(QDir::Filters filters, QDir::SortFlags sortFlags)
 {
     return d->engine->infoList(filters, sortFlags);
 }
 
-QFuture<FileResult> FileEntry::mkdir(const QString &fileName)
+FileJob FileEntry::mkdir(const QString &fileName)
 {
     return d->engine->mkdir(fileName, false);
 }
 
-QFuture<FileResult> FileEntry::rmdir(const QString &fileName)
+FileJob FileEntry::rmdir(const QString &fileName)
 {
     return d->engine->rmdir(fileName, false);
 }
 
-QFuture<FileResult> FileEntry::mkpath(const QString &dirPath)
+FileJob FileEntry::mkpath(const QString &dirPath)
 {
     return d->engine->mkdir(dirPath, true);
 }
 
-QFuture<FileResult> FileEntry::rmpath(const QString &dirPath)
+FileJob FileEntry::rmpath(const QString &dirPath)
 {
     return d->engine->rmdir(dirPath, true);
 }
 
-QFuture<FileResult> FileEntry::touch(const QString &fileName)
+FileJob FileEntry::touch(const QString &fileName)
 {
     typedef void (*func)(QFutureInterface<FileResult> &future, QUrl url);
     func f = [](QFutureInterface<FileResult> &future, QUrl url) {
@@ -130,7 +130,7 @@ QFuture<FileResult> FileEntry::touch(const QString &fileName)
     return QtConcurrent::run(f, absoluteUrl(this->url(), fileName));
 }
 
-QFuture<FileResult> FileEntry::remove(const QString &fileName)
+FileJob FileEntry::remove(const QString &fileName)
 {
     return d->engine->remove(fileName);
 }
@@ -138,7 +138,7 @@ QFuture<FileResult> FileEntry::remove(const QString &fileName)
 /*!
     Renames this file entry to the \a newName.
 */
-QFuture<FileResult> FileEntry::rename(const QString &newName)
+FileJob FileEntry::rename(const QString &newName)
 {
     return d->engine->rename(QString(), newName);
 }
@@ -146,7 +146,7 @@ QFuture<FileResult> FileEntry::rename(const QString &newName)
 /*!
     Renames file or directory at \a oldName to the \a newName.
 */
-QFuture<FileResult> FileEntry::rename(const QString &oldName, const QString &newName)
+FileJob FileEntry::rename(const QString &oldName, const QString &newName)
 {
     return d->engine->rename(oldName, newName);
 }
@@ -157,19 +157,19 @@ QFuture<FileResult> FileEntry::rename(const QString &oldName, const QString &new
     \note link can be created only on the same filesystem (if supported) and it
     is not possible to specify url to the other filesystem
 */
-QFuture<FileResult> FileEntry::link(const QString &linkPath)
+FileJob FileEntry::link(const QString &linkPath)
 {
     Q_UNUSED(linkPath);
     Q_UNIMPLEMENTED();
-    return QFuture<FileResult>();
+    return FileJob();
 }
 
-QFuture<FileInfo> FileEntry::stat(const QString &fileName)
+StatJob FileEntry::stat(const QString &fileName)
 {
     return d->engine->stat(fileName);
 }
 
-QFuture<FileResult> FileEntry::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
+FileJob FileEntry::setPermissions(const QString &fileName, QFileDevice::Permissions permissions)
 {
     return d->engine->setPermissions(fileName, permissions);
 }
@@ -205,7 +205,7 @@ static bool doRemove(const FileInfo &info)
     return f.result();
 }
 
-QFuture<FileResult> FileEntry::removeRecursively(const QString &fileName)
+FileJob FileEntry::removeRecursively(const QString &fileName)
 {
     typedef void (*func)(QFutureInterface<FileResult> &future, QUrl url);
     func f = [](QFutureInterface<FileResult> &future, QUrl url) {
@@ -266,7 +266,7 @@ static FileResult doCopy(const QUrl &sourceUrl, const QUrl &destUrl)
     return FileResult();
 }
 
-QFuture<FileResult> FileEntry::copy(const QUrl &destUrl)
+FileJob FileEntry::copy(const QUrl &destUrl)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
     Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
@@ -275,7 +275,7 @@ QFuture<FileResult> FileEntry::copy(const QUrl &destUrl)
     return QtConcurrent::run(func, absoluteUrl(url(), QString()), destUrl);
 }
 
-QFuture<FileResult> FileEntry::copy(const QString &fileName, const QUrl &destUrl)
+FileJob FileEntry::copy(const QString &fileName, const QUrl &destUrl)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
     Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
@@ -296,7 +296,7 @@ static FileResult doMove(const QUrl &sourceUrl, const QUrl &destUrl)
     return ok ? FileResult() : FileResult::Error::Unknown;
 }
 
-QFuture<FileResult> FileEntry::move(const QUrl &destUrl)
+FileJob FileEntry::move(const QUrl &destUrl)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
     Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
@@ -305,7 +305,7 @@ QFuture<FileResult> FileEntry::move(const QUrl &destUrl)
     return QtConcurrent::run(func, absoluteUrl(url(), QString()), destUrl);
 }
 
-QFuture<FileResult> FileEntry::move(const QString &fileName, const QUrl &destUrl)
+FileJob FileEntry::move(const QString &fileName, const QUrl &destUrl)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
     Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {

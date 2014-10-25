@@ -101,7 +101,7 @@ static FileInfoList doList(FileOperation op, QDir::Filters filters, QDir::SortFl
     return list;
 }
 
-QFuture<QStringList> SyncDirEngineWrapper::list(QDir::Filters filters, QDir::SortFlags sortFlags)
+ListJob SyncDirEngineWrapper::list(QDir::Filters filters, QDir::SortFlags sortFlags)
 {
     typedef void (*Func)(QFutureInterface<QStringList> &,
                          FileOperation,
@@ -120,7 +120,7 @@ QFuture<QStringList> SyncDirEngineWrapper::list(QDir::Filters filters, QDir::Sor
     return QtConcurrent::run(f, FileOperation(m_state, url()), filters, sortFlags);
 }
 
-QFuture<FileInfoList> SyncDirEngineWrapper::infoList(QDir::Filters filters,
+InfoListJob SyncDirEngineWrapper::infoList(QDir::Filters filters,
                                                      QDir::SortFlags sortFlags)
 {
     typedef void (*Func)(QFutureInterface<FileInfoList> &,
@@ -136,7 +136,7 @@ QFuture<FileInfoList> SyncDirEngineWrapper::infoList(QDir::Filters filters,
     return QtConcurrent::run(f, FileOperation(m_state, url()), filters, sortFlags);
 }
 
-QFuture<FileResult> SyncDirEngineWrapper::mkdir(const QString &dirName, bool createParents)
+FileJob SyncDirEngineWrapper::mkdir(const QString &dirName, bool createParents)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, FileOperation, bool);
     Handler h = [](QFutureInterface<FileResult> &future, FileOperation op, bool createParents) {
@@ -148,7 +148,7 @@ QFuture<FileResult> SyncDirEngineWrapper::mkdir(const QString &dirName, bool cre
     return QtConcurrent::run(h, FileOperation(m_state, url(), dirName), createParents);
 }
 
-QFuture<FileResult> SyncDirEngineWrapper::rmdir(const QString &dirName, bool removeEmptyParents)
+FileJob SyncDirEngineWrapper::rmdir(const QString &dirName, bool removeEmptyParents)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, FileOperation, bool);
     Handler h = [](QFutureInterface<FileResult> &future, FileOperation op, bool removeEmptyParents) {
@@ -160,7 +160,7 @@ QFuture<FileResult> SyncDirEngineWrapper::rmdir(const QString &dirName, bool rem
     return QtConcurrent::run(h, FileOperation(m_state, url(), dirName), removeEmptyParents);
 }
 
-QFuture<FileResult> SyncDirEngineWrapper::remove(const QString &fileName)
+FileJob SyncDirEngineWrapper::remove(const QString &fileName)
 {
     Handler h = [](QFutureInterface<FileResult> &future, FileOperation op) {
         QMutexLocker l(&op.state->mutex);
@@ -171,7 +171,7 @@ QFuture<FileResult> SyncDirEngineWrapper::remove(const QString &fileName)
     return QtConcurrent::run(h, FileOperation(m_state, url(), fileName));
 }
 
-QFuture<FileResult> SyncDirEngineWrapper::rename(const QString &oldName, const QString &newName)
+FileJob SyncDirEngineWrapper::rename(const QString &oldName, const QString &newName)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, FileOperation, QString);
     Handler h = [](QFutureInterface<FileResult> &future, FileOperation op, QString newName) {
@@ -183,7 +183,7 @@ QFuture<FileResult> SyncDirEngineWrapper::rename(const QString &oldName, const Q
     return QtConcurrent::run(h, FileOperation(m_state, url(), oldName), newName);
 }
 
-QFuture<FileResult> SyncDirEngineWrapper::setPermissions(const QString &fileName, QFile::Permissions permissions)
+FileJob SyncDirEngineWrapper::setPermissions(const QString &fileName, QFile::Permissions permissions)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, FileOperation, QFile::Permissions);
     Handler h = [](QFutureInterface<FileResult> &future, FileOperation op, QFile::Permissions permissions) {
@@ -195,7 +195,7 @@ QFuture<FileResult> SyncDirEngineWrapper::setPermissions(const QString &fileName
     return QtConcurrent::run(h, FileOperation(m_state, url(), fileName), permissions);
 }
 
-QFuture<FileInfo> SyncDirEngineWrapper::stat(const QString &fileName)
+StatJob SyncDirEngineWrapper::stat(const QString &fileName)
 {
     typedef void (*Handler)(QFutureInterface<FileInfo> &, FileOperation);
     Handler h = [](QFutureInterface<FileInfo> &future, FileOperation op) {

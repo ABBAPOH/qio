@@ -9,15 +9,14 @@ class QIO_EXPORT SyncDirEngineWrapper : public AbstractDirEngine
 public:
     explicit SyncDirEngineWrapper(AbstractSyncFileEntryEngine *engine);
 
-    QFuture<QStringList> list(QDir::Filters filters, QDir::SortFlags sortFlags) Q_DECL_OVERRIDE;
-    QFuture<FileInfoList> infoList(QDir::Filters filters,
-                                   QDir::SortFlags sortFlags) Q_DECL_OVERRIDE;
-    QFuture<FileResult> mkdir(const QString &dirName, bool createParents) Q_DECL_OVERRIDE;
-    QFuture<FileResult> rmdir(const QString &dirName, bool removeEmptyParents) Q_DECL_OVERRIDE;
-    QFuture<FileResult> remove(const QString &fileName) Q_DECL_OVERRIDE;
-    QFuture<FileResult> rename(const QString &oldName, const QString &newName) Q_DECL_OVERRIDE;
-    QFuture<FileResult> setPermissions(const QString &fileName, QFileDevice::Permissions permissions) Q_DECL_OVERRIDE;
-    QFuture<FileInfo> stat(const QString &fileName) Q_DECL_OVERRIDE;
+    ListJob list(QDir::Filters filters, QDir::SortFlags sortFlags) Q_DECL_OVERRIDE;
+    InfoListJob infoList(QDir::Filters filters, QDir::SortFlags sortFlags) Q_DECL_OVERRIDE;
+    FileJob mkdir(const QString &dirName, bool createParents) Q_DECL_OVERRIDE;
+    FileJob rmdir(const QString &dirName, bool removeEmptyParents) Q_DECL_OVERRIDE;
+    FileJob remove(const QString &fileName) Q_DECL_OVERRIDE;
+    FileJob rename(const QString &oldName, const QString &newName) Q_DECL_OVERRIDE;
+    FileJob setPermissions(const QString &fileName, QFileDevice::Permissions permissions) Q_DECL_OVERRIDE;
+    StatJob stat(const QString &fileName) Q_DECL_OVERRIDE;
 
 private:
     struct SharedState
