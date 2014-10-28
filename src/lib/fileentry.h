@@ -4,6 +4,7 @@
 #include <QIO/FileInfo>
 #include <QIO/FileResult>
 #include <QIO/Jobs>
+#include <QIO/Watchers>
 
 #include <QtCore/QDir>
 #include <QtCore/QFuture>
