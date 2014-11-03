@@ -206,32 +206,36 @@ static bool doRemove(const FileInfo &info)
     return f.result();
 }
 
-static void listToRemoveHelper(const FileInfo &info, FileInfoList &result)
+static FileInfoList listToRemove(const QUrl &url)
 {
     static const auto filters = QDir::NoDotAndDotDot
             | QDir::AllEntries
             | QDir::Hidden
             | QDir::System;
 
-    if (info.isDir()) {
-        FileEntry entry(info.url());
-        InfoListJob listJob = entry.infoList(filters);
-        listJob.waitForFinished();
-        FileInfoList list = listJob.result();
-        foreach (const FileInfo &info, list)
-            listToRemoveHelper(info, result);
-    }
-    result.append(info);
-}
-
-static FileInfoList listToRemove(const QUrl &url)
-{
     FileEntry entry(url);
     StatJob job = entry.stat();
     job.waitForFinished();
 
     FileInfoList result;
-    listToRemoveHelper(job.result(), result);
+    FileInfoList tmp;
+
+    FileInfo info = job.result();
+    tmp.append(info);
+
+    while (!tmp.isEmpty()) {
+        FileInfo info2 = tmp.takeFirst();
+        result.prepend(info2);
+        if (info2.isDir()) {
+            FileEntry entry2(info2.url());
+            InfoListJob job2 = entry2.infoList(filters);
+            job2.waitForFinished();
+            foreach (const FileInfo &info3, job2.result()) {
+                tmp.prepend(info3);
+            }
+        }
+    }
+
     return result;
 }
 
