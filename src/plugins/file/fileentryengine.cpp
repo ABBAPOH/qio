@@ -51,6 +51,7 @@ FileResult FileEntryEngine::rmdir(const QString &dirName, bool removeEmptyParent
 
 FileResult FileEntryEngine::remove(const QString &fileName)
 {
+    const QString localPath = FileEntry::absoluteUrl(url(), fileName).toLocalFile();
     const bool ok = QDir().remove(FileEntry::absoluteUrl(url(), fileName).toLocalFile());
     return ok ? FileResult() : FileResult::Error::Unknown;
 }

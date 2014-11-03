@@ -206,14 +206,61 @@ static bool doRemove(const FileInfo &info)
     return f.result();
 }
 
+static void listToRemoveHelper(const FileInfo &info, FileInfoList &result)
+{
+    static const auto filters = QDir::NoDotAndDotDot
+            | QDir::AllEntries
+            | QDir::Hidden
+            | QDir::System;
+
+    if (info.isDir()) {
+        FileEntry entry(info.url());
+        InfoListJob listJob = entry.infoList(filters);
+        listJob.waitForFinished();
+        FileInfoList list = listJob.result();
+        foreach (const FileInfo &info, list)
+            listToRemoveHelper(info, result);
+    }
+    result.append(info);
+}
+
+static FileInfoList listToRemove(const QUrl &url)
+{
+    FileEntry entry(url);
+    StatJob job = entry.stat();
+    job.waitForFinished();
+
+    FileInfoList result;
+    listToRemoveHelper(job.result(), result);
+    return result;
+}
+
 FileJob FileEntry::removeRecursively(const QString &fileName)
 {
     typedef void (*func)(QFutureInterface<FileResult> &future, QUrl url);
     func f = [](QFutureInterface<FileResult> &future, QUrl url) {
-        auto f2 = FileEntry(url).stat();
-        f2.waitForFinished();
-        bool ok = doRemove(f2.result());
-        future.reportResult(ok ? FileResult() : FileResult::Error::Unknown);
+        const FileInfoList toRemove = listToRemove(url);
+
+        future.setProgressRange(0, toRemove.count());
+        int count = 0;
+
+        foreach (const FileInfo &info, toRemove) {
+            FileEntry entry(info.url());
+            FileJob job;
+            if (info.isDir())
+                job = entry.rmdir();
+            else
+                job = entry.remove();
+            job.waitForFinished();
+            const FileResult result = job.result();
+            if (!result) {
+                future.reportResult(result);
+                return;
+            }
+            future.setProgressValue(++count);
+        }
+
+        future.reportResult(FileResult());
     };
     return QtConcurrent::run(f, absoluteUrl(url(), fileName));
 }
