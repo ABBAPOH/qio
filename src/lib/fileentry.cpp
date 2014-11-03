@@ -11,6 +11,7 @@ FileEntryData::FileEntryData() :
 }
 
 FileEntryData::FileEntryData(const FileEntryData &other) :
+    QSharedData(other),
     url(other.url),
     engine(createEngine(other.url))
 {
