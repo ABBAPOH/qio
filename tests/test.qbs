@@ -1,14 +1,13 @@
 import qbs.base 1.0
 
 Product {
-    type: "application"
-    destinationDirectory: project.install_binary_path
-
     Depends { name: "cpp" }
     Depends { name: "Qt.core" }
     Depends { name: "Qt.test" }
     Depends { name: "qio" }
 
+    type: "application"
+    destinationDirectory: project.install_binary_path
     cpp.includePaths: project.includePaths
     cpp.cxxFlags: {
         if (qbs.targetOS.contains("osx"))
@@ -24,8 +23,8 @@ Product {
     cpp.minimumOsxVersion: "10.7"
 
     Properties {
-        condition: qbs.targetOS.contains("unix")
-        cpp.rpaths: [ "$ORIGIN/../lib" + project.lib_suffix ]
+        condition: qbs.targetOS.contains("unix") && !qbs.targetOS.contains("osx")
+        cpp.rpaths: [ "$ORIGIN/../lib" + project.lib_suffix + "/" + project.app_target ]
     }
 
     Group {

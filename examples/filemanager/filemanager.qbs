@@ -24,6 +24,11 @@ Application {
     cpp.linkerFlags: qbs.targetOS.contains("osx") ? [ "-stdlib=libc++" ] : []
     cpp.minimumOsxVersion: "10.7"
 
+    Properties {
+        condition: qbs.targetOS.contains("unix") && !qbs.targetOS.contains("osx")
+        cpp.rpaths: [ "$ORIGIN/../lib" + project.lib_suffix + "/" + project.app_target ]
+    }
+
     files: [
         "*.cpp",
         "*.h",
