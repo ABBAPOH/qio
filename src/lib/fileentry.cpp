@@ -206,6 +206,66 @@ static bool doRemove(const FileInfo &info)
     return f.result();
 }
 
+struct Operation
+{
+    enum Type { None = 0x0, Mkdir, RmDir, Copy, Remove };
+
+    Operation() : type(None) {}
+    Operation(Type type, const QUrl &source, const QUrl &destination = QUrl()) :
+        type(type), source(source), destination(destination)
+    {}
+
+    Type type;
+    QUrl source;
+    QUrl destination;
+};
+
+enum OperationFlag { None = 0x0, Remove = 0x1, Copy = 0x2 };
+Q_DECLARE_FLAGS(OperationFlags, OperationFlag)
+
+static void operationListHelper(const FileInfo &info, const QUrl &destUrl, OperationFlags type, QVector<Operation> &result)
+{
+    static const auto filters = QDir::NoDotAndDotDot
+            | QDir::AllEntries
+            | QDir::Hidden
+            | QDir::System;
+
+    if (info.isDir()) {
+        if (type & OperationFlag::Copy)
+            result.append(Operation(Operation::Type::Mkdir, QUrl(), destUrl));
+
+        FileEntry entry2(info.url());
+        InfoListJob job2 = entry2.infoList(filters);
+        job2.waitForFinished();
+        foreach (const FileInfo &info3, job2.result()) {
+            const QUrl destUrl2 = FileEntry::absoluteUrl(destUrl, info3.fileName());
+            operationListHelper(info3, destUrl2, type, result);
+        }
+
+        if (type & OperationFlag::Remove)
+            result.append(Operation(Operation::Type::RmDir, info.url()));
+
+    } else {
+        if (type & OperationFlag::Copy) {
+            result.append(Operation(Operation::Type::Copy, info.url(), destUrl));
+        }
+        if (type & OperationFlag::Remove)
+            result.append(Operation(Operation::Type::Remove, info.url()));
+    }
+}
+
+static QVector<Operation> operationList(const QUrl &sourceUrl, const QUrl &destUrl, OperationFlags type)
+{
+    QVector<Operation> result;
+
+    FileEntry entry(sourceUrl);
+    StatJob job = entry.stat();
+    job.waitForFinished();
+
+    operationListHelper(job.result(), destUrl, type, result);
+    return result;
+}
+
 static FileInfoList listToRemove(const QUrl &url)
 {
     static const auto filters = QDir::NoDotAndDotDot
@@ -239,90 +299,85 @@ static FileInfoList listToRemove(const QUrl &url)
     return result;
 }
 
+FileResult copyFile(const QUrl &sourceUrl, const QUrl &destUrl)
+{
+    File sourceFile(sourceUrl);
+    File destFile(destUrl);
+    if (!sourceFile.open(QIODevice::ReadOnly))
+        return FileResult::Error::Unknown;
+    if (!destFile.open(QIODevice::WriteOnly))
+        return FileResult::Error::Unknown;
+
+    while (!sourceFile.atEnd()) {
+        sourceFile.waitForReadyRead();
+        destFile.write(sourceFile.read(sourceFile.bytesAvailable()));
+        destFile.waitForBytesWritten();
+    }
+
+    return FileResult();
+}
+
+void doWork(QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl, OperationFlags flags)
+{
+    const auto operations = ::operationList(sourceUrl, destUrl, flags);
+    future.setProgressRange(0, operations.count());
+    int count = 0;
+
+    foreach (const Operation &op, operations) {
+        FileEntry sourceEntry(op.source);
+        FileEntry destEntry(op.destination);
+        FileResult r;
+        switch (op.type) {
+        case Operation::Type::RmDir: {
+            FileJob job = sourceEntry.rmdir();
+            job.waitForFinished();
+            r = job.result();
+            break;
+        } case Operation::Type::Remove: {
+            FileJob job  = sourceEntry.remove();
+            job.waitForFinished();
+            r = job.result();
+            break;
+        } case Operation::Type::Copy: {
+            r = copyFile(op.source, op.destination);
+            Q_ASSERT(r);
+            break;
+        } case Operation::Type::Mkdir: {
+            FileJob job = destEntry.mkdir();
+            job.waitForFinished();
+            r = job.result();
+            break;
+        } default:
+            Q_UNREACHABLE();
+            break;
+        }
+
+        if (!r) {
+            future.reportResult(r);
+            return;
+        }
+
+        future.setProgressValue(++count);
+    }
+
+    future.reportResult(FileResult());
+}
+
 FileJob FileEntry::removeRecursively(const QString &fileName)
 {
     typedef void (*func)(QFutureInterface<FileResult> &future, QUrl url);
     func f = [](QFutureInterface<FileResult> &future, QUrl url) {
-        const FileInfoList toRemove = listToRemove(url);
-
-        future.setProgressRange(0, toRemove.count());
-        int count = 0;
-
-        foreach (const FileInfo &info, toRemove) {
-            FileEntry entry(info.url());
-            FileJob job;
-            if (info.isDir())
-                job = entry.rmdir();
-            else
-                job = entry.remove();
-            job.waitForFinished();
-            const FileResult result = job.result();
-            if (!result) {
-                future.reportResult(result);
-                return;
-            }
-            future.setProgressValue(++count);
-        }
-
-        future.reportResult(FileResult());
+        doWork(future, url, QUrl(), OperationFlag::Remove);
+        return;
     };
     return QtConcurrent::run(f, absoluteUrl(url(), fileName));
-}
-
-static FileResult doCopy(const QUrl &sourceUrl, const QUrl &destUrl)
-{
-    FileEntry sourceEntry(sourceUrl);
-    auto statFuture = sourceEntry.stat();
-    statFuture.waitForFinished();
-    const FileInfo info = statFuture.result();
-
-    if (!info.exists())
-        return FileResult::Error::NoEntry;
-
-    if (info.isDir()) {
-        FileEntry destEntry(destUrl);
-        auto mkdirFuture = destEntry.mkdir();
-        mkdirFuture.waitForFinished();
-        if (!mkdirFuture.result())
-            return mkdirFuture.result();
-
-        static const auto filters = QDir::NoDotAndDotDot
-                | QDir::AllEntries
-                | QDir::Hidden
-                | QDir::System;
-        auto listFuture = sourceEntry.infoList(filters);
-        listFuture.waitForFinished();
-        const FileInfoList list = listFuture.result();
-        foreach (const FileInfo &childInfo, list) {
-            QUrl childDestUrl = destUrl;
-            childDestUrl.setPath(childDestUrl.path() + "/" + childInfo.fileName());
-            FileResult result = doCopy(childInfo.url(), childDestUrl);
-            if (!result)
-                return result;
-        }
-    } else {
-        File sourceFile(sourceUrl);
-        File destFile(destUrl);
-        if (!sourceFile.open(QIODevice::ReadOnly))
-            return FileResult::Error::Unknown;
-        if (!destFile.open(QIODevice::WriteOnly))
-            return FileResult::Error::Unknown;
-
-        while (!sourceFile.atEnd()) {
-            sourceFile.waitForReadyRead();
-            destFile.write(sourceFile.read(sourceFile.bytesAvailable()));
-            destFile.waitForBytesWritten();
-        }
-    }
-
-    return FileResult();
 }
 
 FileJob FileEntry::copy(const QUrl &destUrl)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
     Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
-        future.reportResult(doCopy(sourceUrl, destUrl));
+        doWork(future, sourceUrl, destUrl, OperationFlag::Copy);
     };
     return QtConcurrent::run(func, absoluteUrl(url(), QString()), destUrl);
 }
@@ -331,28 +386,17 @@ FileJob FileEntry::copy(const QString &fileName, const QUrl &destUrl)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
     Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
-        future.reportResult(doCopy(sourceUrl, destUrl));
+        doWork(future, sourceUrl, destUrl, OperationFlag::Copy);
     };
     return QtConcurrent::run(func, absoluteUrl(url(), fileName), destUrl);
-}
-
-static FileResult doMove(const QUrl &sourceUrl, const QUrl &destUrl)
-{
-    FileResult result = doCopy(sourceUrl, destUrl);
-    if (!result)
-        return result;
-
-    auto f2 = FileEntry(sourceUrl).stat();
-    f2.waitForFinished();
-    bool ok = doRemove(f2.result());
-    return ok ? FileResult() : FileResult::Error::Unknown;
 }
 
 FileJob FileEntry::move(const QUrl &destUrl)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
     Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
-        future.reportResult(doMove(sourceUrl, destUrl));
+        OperationFlags flags(OperationFlag::Copy | OperationFlag::Remove);
+        doWork(future, sourceUrl, destUrl, flags);
     };
     return QtConcurrent::run(func, absoluteUrl(url(), QString()), destUrl);
 }
@@ -361,7 +405,8 @@ FileJob FileEntry::move(const QString &fileName, const QUrl &destUrl)
 {
     typedef void (*Handler)(QFutureInterface<FileResult> &, QUrl, QUrl);
     Handler func = [](QFutureInterface<FileResult> &future, QUrl sourceUrl, QUrl destUrl) {
-        future.reportResult(doMove(sourceUrl, destUrl));
+        OperationFlags flags(OperationFlag::Copy | OperationFlag::Remove);
+        doWork(future, sourceUrl, destUrl, flags);
     };
     return QtConcurrent::run(func, absoluteUrl(url(), fileName), destUrl);
 }

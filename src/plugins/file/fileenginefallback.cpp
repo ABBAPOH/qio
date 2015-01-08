@@ -33,6 +33,11 @@ void FileEngineFallback::open(QIODevice::OpenMode mode)
     func f = [](QFutureInterface<bool> &future, ThreadData *data, QIODevice::OpenMode mode) {
         QMutexLocker l(&data->mutex);
         bool ok = data->file->open(mode);
+        if (!ok) {
+            qWarning() << "Can't open file" << data->file->fileName()
+                       << "with mode" << mode
+                       << ":" << data->file->errorString();
+        }
         future.reportResult(ok);
     };
     openWatcher->setFuture(QtConcurrent::run(f, &data, mode));

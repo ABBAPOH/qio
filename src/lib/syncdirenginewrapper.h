@@ -4,6 +4,8 @@
 #include <QIO/AbstractDirEngine>
 #include <QIO/AbstractSyncFileEntryEngine>
 
+#include <QtCore/QSharedPointer>
+
 class QIO_EXPORT SyncDirEngineWrapper : public AbstractDirEngine
 {
 public:
