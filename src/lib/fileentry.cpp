@@ -266,7 +266,7 @@ static QVector<Operation> operationList(const QUrl &sourceUrl, const QUrl &destU
     return result;
 }
 
-FileResult copyFile(const QUrl &sourceUrl, const QUrl &destUrl)
+static FileResult copyFile(const QUrl &sourceUrl, const QUrl &destUrl)
 {
     File sourceFile(sourceUrl);
     File destFile(destUrl);
