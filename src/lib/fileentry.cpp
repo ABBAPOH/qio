@@ -266,39 +266,6 @@ static QVector<Operation> operationList(const QUrl &sourceUrl, const QUrl &destU
     return result;
 }
 
-static FileInfoList listToRemove(const QUrl &url)
-{
-    static const auto filters = QDir::NoDotAndDotDot
-            | QDir::AllEntries
-            | QDir::Hidden
-            | QDir::System;
-
-    FileEntry entry(url);
-    StatJob job = entry.stat();
-    job.waitForFinished();
-
-    FileInfoList result;
-    FileInfoList tmp;
-
-    FileInfo info = job.result();
-    tmp.append(info);
-
-    while (!tmp.isEmpty()) {
-        FileInfo info2 = tmp.takeFirst();
-        result.prepend(info2);
-        if (info2.isDir()) {
-            FileEntry entry2(info2.url());
-            InfoListJob job2 = entry2.infoList(filters);
-            job2.waitForFinished();
-            foreach (const FileInfo &info3, job2.result()) {
-                tmp.prepend(info3);
-            }
-        }
-    }
-
-    return result;
-}
-
 FileResult copyFile(const QUrl &sourceUrl, const QUrl &destUrl)
 {
     File sourceFile(sourceUrl);
